@@ -7,6 +7,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -68,7 +70,7 @@ public class Screen extends Canvas {
 
     public void gameLoop() throws InterruptedException, IOException {
         while (true) {
-            Thread.sleep(20);
+            Thread.sleep(25);
             draw();
             // wait for input
         }
@@ -80,6 +82,7 @@ public class Screen extends Canvas {
         drawLetters(g);
         drawChessBoard(g);
         drawSelection(g);
+        drawPossibleMoves(g);
         drawChessField(g);
 
         g.dispose(); // ?
@@ -174,6 +177,40 @@ public class Screen extends Canvas {
 
             g.fillRect((game.selection.x * 100) + 50, (game.selection.y * 100) + 50, 100, 100);
         }
+    }
+
+    private void drawPossibleMoves(Graphics2D g) {
+        if (game.selection.selected) {
+            var moves = game.selection.possibleMoves;
+            moves.forEach(move -> {
+                g.setColor(new Color(20, 20, 20, 50));
+                if (game.field[move[0]][move[1]] == 10) {
+                    g.fillOval((move[0] * 100) + 80, (move[1] * 100) + 80, 35, 35);
+                } else {
+                    var ring = createRingShape((move[0] * 100) + 100, (move[1] * 100) + 100, 50, 9 );
+                    g.fill(ring);
+                }
+
+            });
+        }
+    }
+
+    private static Shape createRingShape(
+            double centerX, double centerY, double outerRadius, double thickness)
+    {
+        Ellipse2D outer = new Ellipse2D.Double(
+                centerX - outerRadius,
+                centerY - outerRadius,
+                outerRadius + outerRadius,
+                outerRadius + outerRadius);
+        Ellipse2D inner = new Ellipse2D.Double(
+                centerX - outerRadius + thickness,
+                centerY - outerRadius + thickness,
+                outerRadius + outerRadius - thickness - thickness,
+                outerRadius + outerRadius - thickness - thickness);
+        Area area = new Area(outer);
+        area.subtract(new Area(inner));
+        return area;
     }
 
 }

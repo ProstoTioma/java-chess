@@ -142,13 +142,13 @@ public class Game {
         List<int[]> possibleMoves = new ArrayList<>();
         if (field[x][y] == 11) {
             if (field[x][y + 1] == 10) possibleMoves.add(new int[]{x, y + 1});
-            if (x > 0 && field[x - 1][y + 1] != 10) possibleMoves.add(new int[]{x - 1, y + 1});
-            if (x < 7 && field[x + 1][y + 1] != 10) possibleMoves.add(new int[]{x + 1, y + 1});
+            if (x > 0 && (!isSameColor(field[x - 1][y + 1], field[x][y]) && field[x - 1][y + 1] != 10)) possibleMoves.add(new int[]{x - 1, y + 1});
+            if (x < 7 && (!isSameColor(field[x + 1][y + 1], field[x][y]) && field[x + 1][y + 1] != 10)) possibleMoves.add(new int[]{x + 1, y + 1});
             if (y == 1 && field[x][y + 1] == 10 && field[x][y + 2] == 10) possibleMoves.add(new int[]{x, y + 2});
         } else {
             if (field[x][y - 1] == 10) possibleMoves.add(new int[]{x, y - 1});
-            if (x > 0 && field[x - 1][y - 1] != 10) possibleMoves.add(new int[]{x - 1, y - 1});
-            if (x < 7 && field[x + 1][y - 1] != 10) possibleMoves.add(new int[]{x + 1, y - 1});
+            if (x > 0 && (!isSameColor(field[x - 1][y - 1], field[x][y]) && field[x - 1][y - 1] != 10)) possibleMoves.add(new int[]{x - 1, y - 1});
+            if (x < 7 && (!isSameColor(field[x + 1][y - 1], field[x][y]) && field[x + 1][y - 1] != 10)) possibleMoves.add(new int[]{x + 1, y - 1});
             if (y == 6 && field[x][y - 1] == 10 && field[x][y - 2] == 10) possibleMoves.add(new int[]{x, y - 2});
         }
 
@@ -311,29 +311,29 @@ public class Game {
     public List<int[]> getPossibleMovesKing(int x, int y) {
         List<int[]> possibleMoves = new ArrayList<>();
 
-        if (y < 7 &&( field[x][y + 1] == 10 || !isSameColor(field[x][y + 1], field[x][y])))
+        if (y < 7 && (field[x][y + 1] == 10 || !isSameColor(field[x][y + 1], field[x][y])))
             possibleMoves.add(new int[]{x, y + 1});
 
-        if (y > 0 &&( field[x][y - 1] == 10 || !isSameColor(field[x][y - 1], field[x][y])))
+        if (y > 0 && (field[x][y - 1] == 10 || !isSameColor(field[x][y - 1], field[x][y])))
             possibleMoves.add(new int[]{x, y - 1});
 
         if (x < 7 && (field[x + 1][y] == 10 || !isSameColor(field[x + 1][y], field[x][y])))
             possibleMoves.add(new int[]{x + 1, y});
 
-        if (x > 0  && (field[x - 1][y] == 10 || !isSameColor(field[x - 1][y], field[x][y])))
+        if (x > 0 && (field[x - 1][y] == 10 || !isSameColor(field[x - 1][y], field[x][y])))
             possibleMoves.add(new int[]{x - 1, y});
 
         //top right
-        if (y > 0 && x < 7  && (field[x + 1][y - 1] == 10 || !isSameColor(field[x + 1][y - 1], field[x][y])))
+        if (y > 0 && x < 7 && (field[x + 1][y - 1] == 10 || !isSameColor(field[x + 1][y - 1], field[x][y])))
             possibleMoves.add(new int[]{x + 1, y - 1});
         //top left
-        if (y > 0 && x > 0  && (field[x - 1][y - 1] == 10 || !isSameColor(field[x - 1][y - 1], field[x][y])))
+        if (y > 0 && x > 0 && (field[x - 1][y - 1] == 10 || !isSameColor(field[x - 1][y - 1], field[x][y])))
             possibleMoves.add(new int[]{x - 1, y - 1});
         //bottom left
-        if (y < 7 && x > 0  && (field[x - 1][y + 1] == 10 || !isSameColor(field[x - 1][y + 1], field[x][y])))
+        if (y < 7 && x > 0 && (field[x - 1][y + 1] == 10 || !isSameColor(field[x - 1][y + 1], field[x][y])))
             possibleMoves.add(new int[]{x - 1, y + 1});
         //bottom right
-        if (y < 7 && x < 7  && (field[x + 1][y + 1] == 10 || !isSameColor(field[x + 1][y + 1], field[x][y])))
+        if (y < 7 && x < 7 && (field[x + 1][y + 1] == 10 || !isSameColor(field[x + 1][y + 1], field[x][y])))
             possibleMoves.add(new int[]{x + 1, y + 1});
 
         return possibleMoves;
