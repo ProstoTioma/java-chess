@@ -4,13 +4,16 @@ import chess.game.Game;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class MouseHandler implements MouseListener {
 
-    private final Game game;
+    //private final Game game;
+    private Consumer onPressed;
 
-    public MouseHandler(Game game) {
-        this.game = game;
+    public MouseHandler(Consumer onPressed) {
+        this.onPressed = onPressed;
     }
 
     @Override
@@ -21,8 +24,8 @@ public class MouseHandler implements MouseListener {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        game.move(e.getX(), e.getY());
-        System.out.println(e.getX() + " " + e.getY());
+        onPressed.accept(e);
+
     }
 
     @Override

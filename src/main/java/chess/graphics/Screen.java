@@ -13,6 +13,7 @@ import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.function.Consumer;
 
 public class Screen extends Canvas {
 
@@ -84,6 +85,7 @@ public class Screen extends Canvas {
         drawSelection(g);
         drawPossibleMoves(g);
         drawChessField(g);
+        drawSideBar(g);
 
         g.dispose(); // ?
         strategy.show();
@@ -211,6 +213,26 @@ public class Screen extends Canvas {
         Area area = new Area(outer);
         area.subtract(new Area(inner));
         return area;
+    }
+
+    private void drawSideBar(Graphics2D g) {
+        g.setColor(new Color(40, 40, 40));
+        g.fillRoundRect(900, 50, 280, 800, 10, 10);
+    }
+
+    static class Button {
+        int width;
+        int height;
+        Consumer onClick;
+
+        public Button(int width, int height, Consumer onClick) {
+            this.width = width;
+            this.height = height;
+        }
+
+        public void draw(Graphics2D g, int x, int y) {
+
+        }
     }
 
 }
