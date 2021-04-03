@@ -13,7 +13,6 @@ import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.function.Consumer;
 
 public class Screen extends Canvas {
 
@@ -70,6 +69,23 @@ public class Screen extends Canvas {
         return dimg;
     }
 
+    private static Shape createRingShape(
+            double centerX, double centerY, double outerRadius, double thickness) {
+        Ellipse2D outer = new Ellipse2D.Double(
+                centerX - outerRadius,
+                centerY - outerRadius,
+                outerRadius + outerRadius,
+                outerRadius + outerRadius);
+        Ellipse2D inner = new Ellipse2D.Double(
+                centerX - outerRadius + thickness,
+                centerY - outerRadius + thickness,
+                outerRadius + outerRadius - thickness - thickness,
+                outerRadius + outerRadius - thickness - thickness);
+        Area area = new Area(outer);
+        area.subtract(new Area(inner));
+        return area;
+    }
+
     public void gameLoop() throws InterruptedException, IOException {
         while (true) {
             Thread.sleep(10);
@@ -89,6 +105,7 @@ public class Screen extends Canvas {
         drawChessField(g);
         drawSideBar(g);
         drawDragAndDrop(g);
+        drawCellBorder(g);
 
         g.dispose();
         strategy.show();
@@ -143,19 +160,18 @@ public class Screen extends Canvas {
         int x = 50, y = 50;
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                    String image = Game.figuresMap.get(game.field[j][i]);
-                    if (image != null) {
-                        if(!(game.selection.isDragAndDrop && j == game.selection.x && i == game.selection.y)) {
-                            drawImage(g, image, x, y);
-                        }
+                String image = Game.figuresMap.get(game.field[j][i]);
+                if (image != null) {
+                    if (!(game.selection.isDragAndDrop && j == game.selection.x && i == game.selection.y)) {
+                        drawImage(g, image, x, y);
                     }
-                    x += 100;
+                }
+                x += 100;
             }
             x = 50;
             y += 100;
         }
     }
-
 
     private void drawImage(Graphics2D g, String figureName, int x, int y) throws IOException {
         var bi = ImageIO.read(getImageByName(figureName + ".png"));
@@ -196,30 +212,12 @@ public class Screen extends Canvas {
                 if (game.field[move[0]][move[1]] == 10) {
                     g.fillOval((move[0] * 100) + 80, (move[1] * 100) + 80, 35, 35);
                 } else {
-                    var ring = createRingShape((move[0] * 100) + 100, (move[1] * 100) + 100, 50, 9 );
+                    var ring = createRingShape((move[0] * 100) + 100, (move[1] * 100) + 100, 50, 9);
                     g.fill(ring);
                 }
 
             });
         }
-    }
-
-    private static Shape createRingShape(
-            double centerX, double centerY, double outerRadius, double thickness)
-    {
-        Ellipse2D outer = new Ellipse2D.Double(
-                centerX - outerRadius,
-                centerY - outerRadius,
-                outerRadius + outerRadius,
-                outerRadius + outerRadius);
-        Ellipse2D inner = new Ellipse2D.Double(
-                centerX - outerRadius + thickness,
-                centerY - outerRadius + thickness,
-                outerRadius + outerRadius - thickness - thickness,
-                outerRadius + outerRadius - thickness - thickness);
-        Area area = new Area(outer);
-        area.subtract(new Area(inner));
-        return area;
     }
 
     private void drawSideBar(Graphics2D g) {
@@ -229,8 +227,18 @@ public class Screen extends Canvas {
 
 
     private void drawDragAndDrop(Graphics2D g) throws IOException {
-        if(game.selection.isDragAndDrop) {
+        if (game.selection.isDragAndDrop) {
             drawImage(g, Game.figuresMap.get(game.field[game.selection.x][game.selection.y]), game.selection.mouseX - 50, game.selection.mouseY - 50);
+        }
+    }
+
+    private void drawCellBorder(Graphics2D g) {
+        var stroke = new BasicStroke(7);
+        g.setStroke(stroke);
+        g.setColor(new Color(40, 40, 40, 40));
+        if ((game.selection.isDragAndDrop)) {
+            var coords = game.getCellCoordinates(game.selection.mouseX, game.selection.mouseY);
+            g.drawRoundRect((coords[0] * 100) + 50, (coords[1] * 100) + 50, 100, 100, 5, 5);
         }
     }
 
