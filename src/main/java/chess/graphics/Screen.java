@@ -102,10 +102,11 @@ public class Screen extends Canvas {
         drawChessBoard(g);
         drawSelection(g);
         drawPossibleMoves(g);
+        drawCellBorder(g);
         drawChessField(g);
         drawSideBar(g);
         drawDragAndDrop(g);
-        drawCellBorder(g);
+
 
         g.dispose();
         strategy.show();
@@ -228,7 +229,8 @@ public class Screen extends Canvas {
 
     private void drawDragAndDrop(Graphics2D g) throws IOException {
         if (game.selection.isDragAndDrop) {
-            drawImage(g, Game.figuresMap.get(game.field[game.selection.x][game.selection.y]), game.selection.mouseX - 50, game.selection.mouseY - 50);
+            var image = Game.figuresMap.get(game.field[game.selection.x][game.selection.y]);
+            if (image != null) drawImage(g, image, game.selection.mouseX - 50, game.selection.mouseY - 50);
         }
     }
 
@@ -238,7 +240,7 @@ public class Screen extends Canvas {
         g.setColor(new Color(40, 40, 40, 40));
         if ((game.selection.isDragAndDrop)) {
             var coords = game.getCellCoordinates(game.selection.mouseX, game.selection.mouseY);
-            g.drawRoundRect((coords[0] * 100) + 50, (coords[1] * 100) + 50, 100, 100, 5, 5);
+            if (coords != null) g.drawRoundRect((coords[0] * 100) + 50, (coords[1] * 100) + 50, 100, 100, 5, 5);
         }
     }
 

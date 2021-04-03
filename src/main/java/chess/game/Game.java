@@ -54,7 +54,6 @@ public class Game {
         history = new ArrayList<>();
         initField();
         mouseHandler = new MouseHandler((MouseEvent event) -> {
-
             move(event.getX(), event.getY());
         }, (MouseEvent event) -> {
             var coords = getCellCoordinates(event.getX(), event.getY());
