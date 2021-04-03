@@ -8,6 +8,9 @@ public class Selection {
     public int y;
     public boolean selected;
     public List<int[]> possibleMoves;
+    public boolean isDragAndDrop;
+    public int mouseX;
+    public int mouseY;
 
     public Selection(int x, int y, boolean selected) {
         this.x = x;

@@ -1,35 +1,42 @@
 package chess.input;
 
-import chess.game.Game;
-
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
-public class MouseHandler implements MouseListener {
+public class MouseHandler implements MouseListener, MouseMotionListener {
 
-    //private final Game game;
-    private Consumer onPressed;
+    private Consumer<MouseEvent> onPressed;
+    private Consumer<MouseEvent> onReleased;
+    private Consumer<MouseEvent> onDragged;
 
-    public MouseHandler(Consumer onPressed) {
+    public MouseHandler(Consumer<MouseEvent> onPressed, Consumer<MouseEvent> onReleased, Consumer<MouseEvent> onDragged) {
         this.onPressed = onPressed;
+        this.onReleased = onReleased;
+        this.onDragged = onDragged;
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-//        game.move(e.getX(), e.getY());
-//        System.out.println(e.getX() + " " + e.getY());
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
         onPressed.accept(e);
-
     }
+
+//    @Override
+//    public void mousePressed(MouseEvent e) {
+//
+//        game.move(e.x, e.y)
+//
+//    }
+
 
     @Override
     public void mouseReleased(MouseEvent e) {
+        onReleased.accept(e);
     }
 
     @Override
@@ -40,4 +47,13 @@ public class MouseHandler implements MouseListener {
     public void mouseExited(MouseEvent e) {
     }
 
+    @Override
+    public void mouseDragged(MouseEvent e) {
+        onDragged.accept(e);
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+
+    }
 }

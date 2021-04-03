@@ -38,6 +38,7 @@ public class Screen extends Canvas {
 
         setBounds(0, 0, width, height);
         this.addMouseListener(game.getMouseHandler());
+        this.addMouseMotionListener(game.getMouseHandler());
         panel.add(this);
         setIgnoreRepaint(true);
 
@@ -71,7 +72,7 @@ public class Screen extends Canvas {
 
     public void gameLoop() throws InterruptedException, IOException {
         while (true) {
-            Thread.sleep(25);
+            Thread.sleep(10);
             draw();
             // wait for input
         }
@@ -79,6 +80,7 @@ public class Screen extends Canvas {
 
     private void draw() throws IOException {
         var g = getGameGraphics();
+
         drawBackground(g);
         drawLetters(g);
         drawChessBoard(g);
@@ -86,8 +88,9 @@ public class Screen extends Canvas {
         drawPossibleMoves(g);
         drawChessField(g);
         drawSideBar(g);
+        drawDragAndDrop(g);
 
-        g.dispose(); // ?
+        g.dispose();
         strategy.show();
     }
 
@@ -140,9 +143,13 @@ public class Screen extends Canvas {
         int x = 50, y = 50;
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                String image = Game.figuresMap.get(game.field[j][i]);
-                if (image != null) drawImage(g, image, x, y);
-                x += 100;
+                    String image = Game.figuresMap.get(game.field[j][i]);
+                    if (image != null) {
+                        if(!(game.selection.isDragAndDrop && j == game.selection.x && i == game.selection.y)) {
+                            drawImage(g, image, x, y);
+                        }
+                    }
+                    x += 100;
             }
             x = 50;
             y += 100;
@@ -220,18 +227,10 @@ public class Screen extends Canvas {
         g.fillRoundRect(900, 50, 280, 800, 10, 10);
     }
 
-    static class Button {
-        int width;
-        int height;
-        Consumer onClick;
 
-        public Button(int width, int height, Consumer onClick) {
-            this.width = width;
-            this.height = height;
-        }
-
-        public void draw(Graphics2D g, int x, int y) {
-
+    private void drawDragAndDrop(Graphics2D g) throws IOException {
+        if(game.selection.isDragAndDrop) {
+            drawImage(g, Game.figuresMap.get(game.field[game.selection.x][game.selection.y]), game.selection.mouseX - 50, game.selection.mouseY - 50);
         }
     }
 

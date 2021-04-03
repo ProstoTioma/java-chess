@@ -8,15 +8,8 @@ import java.util.*;
 public class Game {
 
     public static Map<Integer, String> figuresMap = new HashMap<>();
-    public final int[][] field = new int[8][8];
-    public final Selection selection = new Selection(0, 0, false);
-    public String currentColor = "WHITE";
-
-    private final MouseHandler mouseHandler = new MouseHandler((Object e) -> {
-        MouseEvent event = (MouseEvent) e;
-        move(event.getX(), event.getY());
-        System.out.println(event.getX() + " " + event.getY());
-    });
+    public static Map<Integer, String> nameOfLettersX = new HashMap<>();
+    public static Map<Integer, String> nameOfLettersY = new HashMap<>();
 
     static {
         figuresMap.put(11, "bp");
@@ -31,10 +24,65 @@ public class Game {
         figuresMap.put(24, "wb");
         figuresMap.put(25, "wq");
         figuresMap.put(26, "wk");
+
+        nameOfLettersX.put(0, "a");
+        nameOfLettersX.put(1, "b");
+        nameOfLettersX.put(2, "c");
+        nameOfLettersX.put(3, "d");
+        nameOfLettersX.put(4, "e");
+        nameOfLettersX.put(5, "f");
+        nameOfLettersX.put(6, "g");
+        nameOfLettersX.put(7, "h");
+
+        nameOfLettersY.put(0, "8");
+        nameOfLettersY.put(1, "7");
+        nameOfLettersY.put(2, "6");
+        nameOfLettersY.put(3, "5");
+        nameOfLettersY.put(4, "4");
+        nameOfLettersY.put(5, "3");
+        nameOfLettersY.put(6, "2");
+        nameOfLettersY.put(7, "1");
     }
 
+    public final int[][] field = new int[8][8];
+    public final Selection selection = new Selection(0, 0, false);
+    public String currentColor = "WHITE";
+    public List<int[]> history;
+    private final MouseHandler mouseHandler;
+
     public Game() {
+        history = new ArrayList<>();
         initField();
+        mouseHandler = new MouseHandler((MouseEvent event) -> {
+
+            move(event.getX(), event.getY());
+        }, (MouseEvent event) -> {
+            var coords = getCellCoordinates(event.getX(), event.getY());
+            int cellX = coords[0];
+            int cellY = coords[1];
+            var cell = field[cellX][cellY];
+
+            if(selection.isDragAndDrop) {
+               selection.possibleMoves.forEach((move) -> {
+                   if (move[0] == cellX && move[1] == cellY) {
+                       field[cellX][cellY] = field[selection.x][selection.y];
+                       field[selection.x][selection.y] = 10;
+                       nextColor();
+                       history.add(new int[]{selection.x, selection.y, cellX, cellY});
+                       System.out.printf("Figure from %s%s to %s%s\n", nameOfLettersX.get(selection.x), nameOfLettersY.get(selection.y), nameOfLettersX.get(cellX), nameOfLettersY.get(cellY));
+                       selection.selected = false;
+                   }
+               });
+
+            }
+
+            selection.isDragAndDrop = false;
+//            System.out.println("released");
+        }, (MouseEvent event) -> {
+            System.out.println(event.getX() + " " + event.getY());
+            selection.mouseX = event.getX();
+            selection.mouseY = event.getY();
+        });
     }
 
     public static void main(String[] args) {
@@ -81,7 +129,7 @@ public class Game {
         int cellX = (x - 50) / 100;
         int cellY = (y - 50) / 100;
         if (x < 850 && x > 50 && y > 50 && y < 850) {
-            System.out.printf("cell coordinates: %d %d \n", cellX, cellY);
+//            System.out.printf("cell coordinates: %d %d \n", cellX, cellY);
             return new int[]{cellX, cellY};
         }
         return null;
@@ -95,33 +143,49 @@ public class Game {
         var cell = field[cellX][cellY];
 
         if (selection.selected) {
-                for (int i = 0; i < selection.possibleMoves.size(); i++) {
-                    var v = selection.possibleMoves.get(i);
-                    if (cellX == v[0] && cellY == v[1]) {
-                        var selected = field[selection.x][selection.y];
-                        if (!isSameColor(cell, selected)) {
-                            if (getFiguresColor(selected).equals(currentColor)) {
-                                field[cellX][cellY] = field[selection.x][selection.y];
-                                field[selection.x][selection.y] = 10;
-                                nextColor();
-                            }
-                            //action
+            boolean actionMade = false;
+            for (int i = 0; i < selection.possibleMoves.size(); i++) {
+                var v = selection.possibleMoves.get(i);
+                if (cellX == v[0] && cellY == v[1]) {
+                    var selected = field[selection.x][selection.y];
+                    if (!isSameColor(cell, selected)) {
+                        if (getFiguresColor(selected).equals(currentColor)) {
+                            field[cellX][cellY] = field[selection.x][selection.y];
+                            field[selection.x][selection.y] = 10;
+                            nextColor();
+                            history.add(new int[]{selection.x, selection.y, cellX, cellY});
+                            System.out.printf("Figure from %s%s to %s%s\n", nameOfLettersX.get(selection.x), nameOfLettersY.get(selection.y), nameOfLettersX.get(cellX), nameOfLettersY.get(cellY));
+                            actionMade = true;
                         }
+                        //action
                     }
-
                 }
-                selection.selected = false;
+            }
+            selection.selected = false;
+
+            if (!actionMade && field[cellX][cellY] != 10) {
+                selection.x = cellX;
+                selection.y = cellY;
+                if(currentColor.equals(getFiguresColor(field[selection.x][selection.y]))) selection.possibleMoves = getPossibleMoves(selection.x, selection.y);
+                else {
+                    selection.possibleMoves = Collections.emptyList();
+                }
+                selection.selected = true;
+                selection.isDragAndDrop = true;
+            }
+
 
         } else if (cell != 10) {
             selection.x = cellX;
             selection.y = cellY;
             if (getFiguresColor(cell).equals(currentColor)) {
                 selection.possibleMoves = getPossibleMoves(cellX, cellY);
+                selection.isDragAndDrop = true;
             } else {
                 selection.possibleMoves = Collections.emptyList();
             }
             selection.selected = true;
-            System.out.printf("Selected %d %d\n", selection.x, selection.y);
+//            System.out.printf("Selected %d %d\n", selection.x, selection.y);
         }
 
     }
@@ -155,13 +219,17 @@ public class Game {
         List<int[]> possibleMoves = new ArrayList<>();
         if (field[x][y] == 11) {
             if (field[x][y + 1] == 10) possibleMoves.add(new int[]{x, y + 1});
-            if (x > 0 && (!isSameColor(field[x - 1][y + 1], field[x][y]) && field[x - 1][y + 1] != 10)) possibleMoves.add(new int[]{x - 1, y + 1});
-            if (x < 7 && (!isSameColor(field[x + 1][y + 1], field[x][y]) && field[x + 1][y + 1] != 10)) possibleMoves.add(new int[]{x + 1, y + 1});
+            if (x > 0 && (!isSameColor(field[x - 1][y + 1], field[x][y]) && field[x - 1][y + 1] != 10))
+                possibleMoves.add(new int[]{x - 1, y + 1});
+            if (x < 7 && (!isSameColor(field[x + 1][y + 1], field[x][y]) && field[x + 1][y + 1] != 10))
+                possibleMoves.add(new int[]{x + 1, y + 1});
             if (y == 1 && field[x][y + 1] == 10 && field[x][y + 2] == 10) possibleMoves.add(new int[]{x, y + 2});
         } else {
             if (field[x][y - 1] == 10) possibleMoves.add(new int[]{x, y - 1});
-            if (x > 0 && (!isSameColor(field[x - 1][y - 1], field[x][y]) && field[x - 1][y - 1] != 10)) possibleMoves.add(new int[]{x - 1, y - 1});
-            if (x < 7 && (!isSameColor(field[x + 1][y - 1], field[x][y]) && field[x + 1][y - 1] != 10)) possibleMoves.add(new int[]{x + 1, y - 1});
+            if (x > 0 && (!isSameColor(field[x - 1][y - 1], field[x][y]) && field[x - 1][y - 1] != 10))
+                possibleMoves.add(new int[]{x - 1, y - 1});
+            if (x < 7 && (!isSameColor(field[x + 1][y - 1], field[x][y]) && field[x + 1][y - 1] != 10))
+                possibleMoves.add(new int[]{x + 1, y - 1});
             if (y == 6 && field[x][y - 1] == 10 && field[x][y - 2] == 10) possibleMoves.add(new int[]{x, y - 2});
         }
 
@@ -358,7 +426,7 @@ public class Game {
         } else {
             currentColor = "WHITE";
         }
-        System.out.printf("%s players move", currentColor);
+        System.out.printf("%s players move\n", currentColor);
     }
 
     private String getFiguresColor(int code) {
