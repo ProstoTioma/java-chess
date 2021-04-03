@@ -46,9 +46,9 @@ public class Game {
 
     public final int[][] field = new int[8][8];
     public final Selection selection = new Selection(0, 0, false);
+    private final MouseHandler mouseHandler;
     public String currentColor = "WHITE";
     public List<int[]> history;
-    private final MouseHandler mouseHandler;
 
     public Game() {
         history = new ArrayList<>();
@@ -60,26 +60,22 @@ public class Game {
             var coords = getCellCoordinates(event.getX(), event.getY());
             int cellX = coords[0];
             int cellY = coords[1];
-            var cell = field[cellX][cellY];
 
-            if(selection.isDragAndDrop) {
-               selection.possibleMoves.forEach((move) -> {
-                   if (move[0] == cellX && move[1] == cellY) {
-                       field[cellX][cellY] = field[selection.x][selection.y];
-                       field[selection.x][selection.y] = 10;
-                       nextColor();
-                       history.add(new int[]{selection.x, selection.y, cellX, cellY});
-                       System.out.printf("Figure from %s%s to %s%s\n", nameOfLettersX.get(selection.x), nameOfLettersY.get(selection.y), nameOfLettersX.get(cellX), nameOfLettersY.get(cellY));
-                       selection.selected = false;
-                   }
-               });
+            if (selection.isDragAndDrop) {
+                selection.possibleMoves.forEach((move) -> {
+                    if (move[0] == cellX && move[1] == cellY) {
+                        field[cellX][cellY] = field[selection.x][selection.y];
+                        field[selection.x][selection.y] = 10;
+                        nextColor();
+                        history.add(new int[]{selection.x, selection.y, cellX, cellY});
+                        System.out.printf("Figure from %s%s to %s%s\n", nameOfLettersX.get(selection.x), nameOfLettersY.get(selection.y), nameOfLettersX.get(cellX), nameOfLettersY.get(cellY));
+                        selection.selected = false;
+                    }
+                });
 
             }
-
             selection.isDragAndDrop = false;
-//            System.out.println("released");
         }, (MouseEvent event) -> {
-            System.out.println(event.getX() + " " + event.getY());
             selection.mouseX = event.getX();
             selection.mouseY = event.getY();
         });
@@ -166,7 +162,8 @@ public class Game {
             if (!actionMade && field[cellX][cellY] != 10) {
                 selection.x = cellX;
                 selection.y = cellY;
-                if(currentColor.equals(getFiguresColor(field[selection.x][selection.y]))) selection.possibleMoves = getPossibleMoves(selection.x, selection.y);
+                if (currentColor.equals(getFiguresColor(field[selection.x][selection.y])))
+                    selection.possibleMoves = getPossibleMoves(selection.x, selection.y);
                 else {
                     selection.possibleMoves = Collections.emptyList();
                 }
