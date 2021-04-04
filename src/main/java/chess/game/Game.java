@@ -63,12 +63,7 @@ public class Game {
             if (selection.isDragAndDrop) {
                 selection.possibleMoves.forEach((move) -> {
                     if (move[0] == cellX && move[1] == cellY) {
-                        field[cellX][cellY] = field[selection.x][selection.y];
-                        field[selection.x][selection.y] = 10;
-                        nextColor();
-                        history.add(new int[]{selection.x, selection.y, cellX, cellY});
-                        System.out.printf("Figure from %s%s to %s%s\n", nameOfLettersX.get(selection.x), nameOfLettersY.get(selection.y), nameOfLettersX.get(cellX), nameOfLettersY.get(cellY));
-                        selection.selected = false;
+                        moveSelectedFigure(cellX, cellY);
                     }
                 });
 
@@ -79,6 +74,8 @@ public class Game {
             selection.mouseY = event.getY();
         });
     }
+
+
 
     public static void main(String[] args) {
         new Game().printFiled();
@@ -130,6 +127,15 @@ public class Game {
         return null;
     }
 
+    private void moveSelectedFigure(int cellX, int cellY) {
+        field[cellX][cellY] = field[selection.x][selection.y];
+        field[selection.x][selection.y] = 10;
+        nextColor();
+        history.add(new int[]{selection.x, selection.y, cellX, cellY});
+        System.out.printf("Figure from %s%s to %s%s\n", nameOfLettersX.get(selection.x), nameOfLettersY.get(selection.y), nameOfLettersX.get(cellX), nameOfLettersY.get(cellY));
+        selection.selected = false;
+    }
+
     public void move(int x, int y) {
         // read input (mouse)
         var coords = getCellCoordinates(x, y);
@@ -145,12 +151,13 @@ public class Game {
                     var selected = field[selection.x][selection.y];
                     if (!isSameColor(cell, selected)) {
                         if (getFiguresColor(selected).equals(currentColor)) {
-                            field[cellX][cellY] = field[selection.x][selection.y];
-                            field[selection.x][selection.y] = 10;
-                            nextColor();
-                            history.add(new int[]{selection.x, selection.y, cellX, cellY});
-                            System.out.printf("Figure from %s%s to %s%s\n", nameOfLettersX.get(selection.x), nameOfLettersY.get(selection.y), nameOfLettersX.get(cellX), nameOfLettersY.get(cellY));
-                            actionMade = true;
+//                            field[cellX][cellY] = field[selection.x][selection.y];
+//                            field[selection.x][selection.y] = 10;
+//                            nextColor();
+//                            history.add(new int[]{selection.x, selection.y, cellX, cellY});
+//                            System.out.printf("Figure from %s%s to %s%s\n", nameOfLettersX.get(selection.x), nameOfLettersY.get(selection.y), nameOfLettersX.get(cellX), nameOfLettersY.get(cellY));
+                              moveSelectedFigure(cellX, cellY);
+                              actionMade = true;
                         }
                         //action
                     }

@@ -13,6 +13,8 @@ import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Screen extends Canvas {
 
@@ -21,8 +23,19 @@ public class Screen extends Canvas {
     private final int width;
     private final int height;
 
+    public static Map<String, BufferedImage> imageMap = new HashMap<>();
 
     private final Game game = new Game();
+
+    static {
+        Game.figuresMap.forEach((k, v) -> {
+            try {
+                imageMap.put(v, ImageIO.read(getImageByName(v + ".png")));
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+        });
+    }
 
 
     public Screen(int width, int height) {
@@ -175,11 +188,11 @@ public class Screen extends Canvas {
     }
 
     private void drawImage(Graphics2D g, String figureName, int x, int y) throws IOException {
-        var bi = ImageIO.read(getImageByName(figureName + ".png"));
+        var bi = imageMap.get(figureName);
         g.drawImage(bi, null, x, y);
     }
 
-    private InputStream getImageByName(String name) {
+    private static InputStream getImageByName(String name) {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         return loader.getResourceAsStream("image/" + name);
     }
