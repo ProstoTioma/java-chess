@@ -142,10 +142,12 @@ public class Game {
         field[cellX][cellY] = field[selection.x][selection.y];
         field[selection.x][selection.y] = 10;
         nextColor();
-        isCheck(currentColor, field);
+        //isCheck(currentColor, field);
         history.add(new int[]{selection.x, selection.y, cellX, cellY});
         System.out.printf("Figure from %s%s to %s%s\n", nameOfLettersX.get(selection.x), nameOfLettersY.get(selection.y), nameOfLettersX.get(cellX), nameOfLettersY.get(cellY));
         selection.selected = false;
+        var nextColor = (currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
+        if(isMate()) System.out.println("Mate! Winner: " + nextColor);
 
     }
 
@@ -176,7 +178,7 @@ public class Game {
                 selection.x = cellX;
                 selection.y = cellY;
                 if (currentColor.equals(getFiguresColor(field[selection.x][selection.y])))
-                    selection.possibleMoves = getValidPossibleMoves(getPossibleMoves(selection.x, selection.y, field));
+                    selection.possibleMoves = getValidPossibleMoves(selection.x, selection.y, getPossibleMoves(selection.x, selection.y, field));
                 else {
                     selection.possibleMoves = Collections.emptyList();
                 }
@@ -189,7 +191,7 @@ public class Game {
             selection.x = cellX;
             selection.y = cellY;
             if (getFiguresColor(cell).equals(currentColor)) {
-                selection.possibleMoves = getValidPossibleMoves(getPossibleMoves(cellX, cellY, field));
+                selection.possibleMoves = getValidPossibleMoves(selection.x, selection.y, getPossibleMoves(cellX, cellY, field));
                 selection.isDragAndDrop = true;
             } else {
                 selection.possibleMoves = Collections.emptyList();
@@ -226,13 +228,13 @@ public class Game {
         return possibleMoves;
     }
 
-    public ArrayList<int[]> getValidPossibleMoves(ArrayList<int[]> possibleMoves) {
+    public ArrayList<int[]> getValidPossibleMoves(int x, int y, ArrayList<int[]> possibleMoves) {
         ArrayList<int[]> validMoves = new ArrayList<>();
 
         possibleMoves.forEach((move) -> {
             int[][] copyField = deepCopy(field);
-            copyField[move[0]][move[1]] = copyField[selection.x][selection.y];
-            copyField[selection.x][selection.y] = 10;
+            copyField[move[0]][move[1]] = copyField[x][y];
+            copyField[x][y] = 10;
             var nextColor = (currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
             if (!isCheck(currentColor, copyField)) {
                 validMoves.add(move);
@@ -420,30 +422,31 @@ public class Game {
     public ArrayList<int[]> getPossibleMovesKing(int x, int y, int[][] chessField) {
         var possibleMoves = new ArrayList<int[]>();
 
-        if (y < 7 && (chessField[x][y + 1] == 10 || !isSameColor(chessField[x][y + 1], chessField[x][y])))
-            possibleMoves.add(new int[]{x, y + 1});
 
-        if (y > 0 && (chessField[x][y - 1] == 10 || !isSameColor(chessField[x][y - 1], chessField[x][y])))
-            possibleMoves.add(new int[]{x, y - 1});
+            if (y < 7 && (chessField[x][y + 1] == 10 || !isSameColor(chessField[x][y + 1], chessField[x][y])))
+                possibleMoves.add(new int[]{x, y + 1});
 
-        if (x < 7 && (chessField[x + 1][y] == 10 || !isSameColor(chessField[x + 1][y], chessField[x][y])))
-            possibleMoves.add(new int[]{x + 1, y});
+            if (y > 0 && (chessField[x][y - 1] == 10 || !isSameColor(chessField[x][y - 1], chessField[x][y])))
+                possibleMoves.add(new int[]{x, y - 1});
 
-        if (x > 0 && (chessField[x - 1][y] == 10 || !isSameColor(chessField[x - 1][y], chessField[x][y])))
-            possibleMoves.add(new int[]{x - 1, y});
+            if (x < 7 && (chessField[x + 1][y] == 10 || !isSameColor(chessField[x + 1][y], chessField[x][y])))
+                possibleMoves.add(new int[]{x + 1, y});
 
-        //top right
-        if (y > 0 && x < 7 && (chessField[x + 1][y - 1] == 10 || !isSameColor(chessField[x + 1][y - 1], chessField[x][y])))
-            possibleMoves.add(new int[]{x + 1, y - 1});
-        //top left
-        if (y > 0 && x > 0 && (chessField[x - 1][y - 1] == 10 || !isSameColor(chessField[x - 1][y - 1], chessField[x][y])))
-            possibleMoves.add(new int[]{x - 1, y - 1});
-        //bottom left
-        if (y < 7 && x > 0 && (chessField[x - 1][y + 1] == 10 || !isSameColor(chessField[x - 1][y + 1], chessField[x][y])))
-            possibleMoves.add(new int[]{x - 1, y + 1});
-        //bottom right
-        if (y < 7 && x < 7 && (chessField[x + 1][y + 1] == 10 || !isSameColor(chessField[x + 1][y + 1], chessField[x][y])))
-            possibleMoves.add(new int[]{x + 1, y + 1});
+            if (x > 0 && (chessField[x - 1][y] == 10 || !isSameColor(chessField[x - 1][y], chessField[x][y])))
+                possibleMoves.add(new int[]{x - 1, y});
+
+            //top right
+            if (y > 0 && x < 7 && (chessField[x + 1][y - 1] == 10 || !isSameColor(chessField[x + 1][y - 1], chessField[x][y])))
+                possibleMoves.add(new int[]{x + 1, y - 1});
+            //top left
+            if (y > 0 && x > 0 && (chessField[x - 1][y - 1] == 10 || !isSameColor(chessField[x - 1][y - 1], chessField[x][y])))
+                possibleMoves.add(new int[]{x - 1, y - 1});
+            //bottom left
+            if (y < 7 && x > 0 && (chessField[x - 1][y + 1] == 10 || !isSameColor(chessField[x - 1][y + 1], chessField[x][y])))
+                possibleMoves.add(new int[]{x - 1, y + 1});
+            //bottom right
+            if (y < 7 && x < 7 && (chessField[x + 1][y + 1] == 10 || !isSameColor(chessField[x + 1][y + 1], chessField[x][y])))
+                possibleMoves.add(new int[]{x + 1, y + 1});
 
         return possibleMoves;
     }
@@ -454,7 +457,7 @@ public class Game {
         } else {
             currentColor = "WHITE";
         }
-        System.out.printf("%s players move\n", currentColor);
+        //System.out.printf("%s players move\n", currentColor);
     }
 
     private String getFiguresColor(int code) {
@@ -482,7 +485,7 @@ public class Game {
                     for (int[] move : moves) {
                         if (move[0] == kingX && move[1] == kingY) {
                             check = true;
-                            System.out.println("Check " + color);
+                            //System.out.println("Check " + color);
                         }
                     }
                 }
@@ -490,7 +493,27 @@ public class Game {
         }
 
         return check;
+    }
 
+    private boolean isMate() {
+        boolean mate = true;
+        if (isCheck(currentColor, field)) {
+            for (int i = 0; i < 8; i++) {
+                for (int j = 0; j < 8; j++) {
+                    if (currentColor.equals(getFiguresColor(field[j][i]))) {
+                        var moves = getValidPossibleMoves(j, i, getPossibleMoves(j, i, field));
+                        if (!moves.isEmpty()) {
+                            mate = false;
+                            break;
+                        }
+                    }
+                }
+            }
+            //if(getValidPossibleMoves(getPossibleMovesKing(x, y, field)).size() == 0) mate = true;
+        } else {
+            mate = false;
+        }
+        return mate;
     }
 
 
