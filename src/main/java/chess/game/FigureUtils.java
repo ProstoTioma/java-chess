@@ -1,8 +1,47 @@
 package chess.game;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FigureUtils {
+
+    public static Map<Integer, String> figuresMap = new HashMap<>();
+    public static Map<Integer, String> nameOfLettersX = new HashMap<>();
+    public static Map<Integer, String> nameOfLettersY = new HashMap<>();
+
+    static {
+        figuresMap.put(11, "bp");
+        figuresMap.put(12, "br");
+        figuresMap.put(13, "bn");
+        figuresMap.put(14, "bb");
+        figuresMap.put(15, "bq");
+        figuresMap.put(16, "bk");
+        figuresMap.put(21, "wp");
+        figuresMap.put(22, "wr");
+        figuresMap.put(23, "wn");
+        figuresMap.put(24, "wb");
+        figuresMap.put(25, "wq");
+        figuresMap.put(26, "wk");
+
+        nameOfLettersX.put(0, "a");
+        nameOfLettersX.put(1, "b");
+        nameOfLettersX.put(2, "c");
+        nameOfLettersX.put(3, "d");
+        nameOfLettersX.put(4, "e");
+        nameOfLettersX.put(5, "f");
+        nameOfLettersX.put(6, "g");
+        nameOfLettersX.put(7, "h");
+
+        nameOfLettersY.put(0, "8");
+        nameOfLettersY.put(1, "7");
+        nameOfLettersY.put(2, "6");
+        nameOfLettersY.put(3, "5");
+        nameOfLettersY.put(4, "4");
+        nameOfLettersY.put(5, "3");
+        nameOfLettersY.put(6, "2");
+        nameOfLettersY.put(7, "1");
+    }
 
     public static boolean isSameColor(int firstFigure, int secondFigure) {
         return firstFigure < 17 && firstFigure > 10 && secondFigure < 17 && secondFigure > 10 || firstFigure > 17 && secondFigure > 17;

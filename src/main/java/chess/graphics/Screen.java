@@ -16,6 +16,8 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import static chess.game.FigureUtils.figuresMap;
+
 public class Screen extends Canvas {
 
     private final BufferStrategy strategy;
@@ -28,7 +30,7 @@ public class Screen extends Canvas {
     private final Game game = new Game();
 
     static {
-        Game.figuresMap.forEach((k, v) -> {
+        figuresMap.forEach((k, v) -> {
             try {
                 imageMap.put(v, ImageIO.read(getImageByName(v + ".png")));
             } catch (IOException ioException) {
@@ -169,7 +171,7 @@ public class Screen extends Canvas {
         int x = 50, y = 50;
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                String image = Game.figuresMap.get(game.field[j][i]);
+                String image = figuresMap.get(game.field[j][i]);
                 if (image != null) {
                     if (!(game.selection.isDragAndDrop && j == game.selection.x && i == game.selection.y)) {
                         drawImage(g, image, x, y);
@@ -223,7 +225,7 @@ public class Screen extends Canvas {
 
     private void drawDragAndDrop(Graphics2D g) throws IOException {
         if (game.selection.isDragAndDrop) {
-            var image = Game.figuresMap.get(game.field[game.selection.x][game.selection.y]);
+            var image = figuresMap.get(game.field[game.selection.x][game.selection.y]);
             if (image != null) drawImage(g, image, game.selection.mouseX - 50, game.selection.mouseY - 50);
         }
     }
