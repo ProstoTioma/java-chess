@@ -6,6 +6,8 @@ import java.awt.event.MouseEvent;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static chess.game.FigureUtils.*;
+
 public class Game {
 
     public static Map<Integer, String> figuresMap = new HashMap<>();
@@ -47,59 +49,21 @@ public class Game {
 
     public final int[][] field = new int[8][8];
     public final Selection selection = new Selection(0, 0, false);
-    private final MouseHandler mouseHandler;
+    private final MouseHandler mouseHandler = new MouseHandler();
     public String currentColor = "WHITE";
-    public List<int[]> history;
+    public List<int[]> history = new ArrayList<>();
+
 
     public Game() {
-        history = new ArrayList<>();
         initField();
-        mouseHandler = new MouseHandler((MouseEvent event) -> {
-            move(event.getX(), event.getY());
-        }, (MouseEvent event) -> {
-            try {
-                var coords = getCellCoordinates(event.getX(), event.getY());
-                int cellX = coords[0];
-                int cellY = coords[1];
 
-                if (selection.isDragAndDrop) {
-                    selection.possibleMoves.forEach((move) -> {
-                        if (move[0] == cellX && move[1] == cellY) {
-                            moveSelectedFigure(cellX, cellY);
-                        }
-                    });
-
-                }
-            } finally {
-                selection.isDragAndDrop = false;
-            }
-
-
-        }, (MouseEvent event) -> {
+        mouseHandler.addOnPressedListener((MouseEvent event) -> move(event.getX(), event.getY()));
+        mouseHandler.addOnReleasedListener((MouseEvent event) ->
+                move(event.getX(), event.getY()));
+        mouseHandler.addOnDraggedListener((MouseEvent event) -> {
             selection.mouseX = event.getX();
             selection.mouseY = event.getY();
         });
-    }
-
-
-    public static void main(String[] args) {
-        new Game().printFiled();
-    }
-
-    public static int[][] deepCopy(int[][] org) {
-        if (org == null) {
-            return null;
-        }
-
-        final int[][] res = new int[org.length][];
-        for (int i = 0; i < org.length; i++) {
-            res[i] = Arrays.copyOf(org[i], org[i].length);
-        }
-        return res;
-    }
-
-    public MouseHandler getMouseHandler() {
-        return mouseHandler;
     }
 
     private void initField() {
@@ -134,16 +98,6 @@ public class Game {
 
     }
 
-    public int[] getCellCoordinates(int x, int y) {
-        int cellX = (x - 50) / 100;
-        int cellY = (y - 50) / 100;
-        if (x < 850 && x > 50 && y > 50 && y < 850) {
-//            System.out.printf("cell coordinates: %d %d \n", cellX, cellY);
-            return new int[]{cellX, cellY};
-        }
-        return null;
-    }
-
     private void moveSelectedFigure(int cellX, int cellY) {
         field[cellX][cellY] = field[selection.x][selection.y];
         if (isLongCastlingMove(cellX)) {
@@ -171,7 +125,19 @@ public class Game {
         int cellY = coords[1];
         var cell = field[cellX][cellY];
 
-        if (selection.selected) {
+        if (selection.isDragAndDrop) {
+            try {
+                selection.possibleMoves.forEach((move) -> {
+                    if (move[0] == cellX && move[1] == cellY) {
+                        moveSelectedFigure(cellX, cellY);
+
+                    }
+                });
+
+            } finally {
+                selection.isDragAndDrop = false;
+            }
+        } else if (selection.selected) {
             boolean actionMade = false;
             for (int i = 0; i < selection.possibleMoves.size(); i++) {
                 var v = selection.possibleMoves.get(i);
@@ -198,8 +164,7 @@ public class Game {
                     if ((cell == 16 || cell == 26) && canCastling(true)) {
                         validateShortCastling();
                     }
-                }
-                else {
+                } else {
                     selection.possibleMoves = Collections.emptyList();
                 }
                 selection.selected = true;
@@ -228,6 +193,16 @@ public class Game {
 
     }
 
+    public int[] getCellCoordinates(int x, int y) {
+        int cellX = (x - 50) / 100;
+        int cellY = (y - 50) / 100;
+        if (x < 850 && x > 50 && y > 50 && y < 850) {
+//            System.out.printf("cell coordinates: %d %d \n", cellX, cellY);
+            return new int[]{cellX, cellY};
+        }
+        return null;
+    }
+
     public void printFiled() {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
@@ -238,10 +213,6 @@ public class Game {
         }
     }
 
-    public boolean isSameColor(int firstFigure, int secondFigure) {
-        return firstFigure < 17 && firstFigure > 10 && secondFigure < 17 && secondFigure > 10 || firstFigure > 17 && secondFigure > 17;
-    }
-
     public ArrayList<int[]> getPossibleMoves(int x, int y, int[][] chessField) {
         var possibleMoves = new ArrayList<int[]>();
         if (chessField[x][y] == 11 || chessField[x][y] == 21) possibleMoves = getPossibleMovesPawn(x, y, chessField);
@@ -249,7 +220,8 @@ public class Game {
         if (chessField[x][y] == 14 || chessField[x][y] == 24) possibleMoves = getPossibleMovesBishop(x, y, chessField);
         if (chessField[x][y] == 12 || chessField[x][y] == 22) possibleMoves = getPossibleMovesRook(x, y, chessField);
         if (chessField[x][y] == 15 || chessField[x][y] == 25) possibleMoves = getPossibleMovesQueen(x, y, chessField);
-        if (chessField[x][y] == 16 || chessField[x][y] == 26) possibleMoves = getPossibleMovesKing(x, y, chessField);
+        if (chessField[x][y] == 16 || chessField[x][y] == 26)
+            possibleMoves = getPossibleMovesKing(x, y, chessField, canCastling(true), canCastling(false));
 
         return possibleMoves;
     }
@@ -271,239 +243,12 @@ public class Game {
         return validMoves;
     }
 
-    public ArrayList<int[]> getPossibleMovesPawn(int x, int y, int[][] chessField) {
-        var possibleMoves = new ArrayList<int[]>();
-        if (chessField[x][y] == 11) {
-            if (chessField[x][y + 1] == 10) possibleMoves.add(new int[]{x, y + 1});
-            if (x > 0 && (!isSameColor(chessField[x - 1][y + 1], chessField[x][y]) && chessField[x - 1][y + 1] != 10))
-                possibleMoves.add(new int[]{x - 1, y + 1});
-            if (x < 7 && (!isSameColor(chessField[x + 1][y + 1], chessField[x][y]) && chessField[x + 1][y + 1] != 10))
-                possibleMoves.add(new int[]{x + 1, y + 1});
-            if (y == 1 && chessField[x][y + 1] == 10 && chessField[x][y + 2] == 10)
-                possibleMoves.add(new int[]{x, y + 2});
-        } else {
-            if (chessField[x][y - 1] == 10) possibleMoves.add(new int[]{x, y - 1});
-            if (x > 0 && (!isSameColor(chessField[x - 1][y - 1], chessField[x][y]) && chessField[x - 1][y - 1] != 10))
-                possibleMoves.add(new int[]{x - 1, y - 1});
-            if (x < 7 && (!isSameColor(chessField[x + 1][y - 1], chessField[x][y]) && chessField[x + 1][y - 1] != 10))
-                possibleMoves.add(new int[]{x + 1, y - 1});
-            if (y == 6 && chessField[x][y - 1] == 10 && chessField[x][y - 2] == 10)
-                possibleMoves.add(new int[]{x, y - 2});
-        }
-
-        return possibleMoves;
-    }
-
-    public ArrayList<int[]> getPossibleMovesBishop(int x, int y, int[][] chessField) {
-        var possibleMoves = new ArrayList<int[]>();
-        //botom right
-        for (int j = x + 1, i = y + 1; i < 8 && j < 8; i++, j++) {
-            var nextCell = chessField[j][i];
-            if (nextCell == 10) {
-                possibleMoves.add(new int[]{j, i});
-            } else if (!isSameColor(nextCell, chessField[x][y])) {
-                possibleMoves.add(new int[]{j, i});
-                break;
-
-            } else {
-                break;
-            }
-        }
-        //top left
-        for (int j = x - 1, i = y - 1; i >= 0 && j >= 0; i--, j--) {
-            var nextCell = chessField[j][i];
-            if (nextCell == 10) {
-                possibleMoves.add(new int[]{j, i});
-            } else if (!isSameColor(nextCell, chessField[x][y])) {
-                possibleMoves.add(new int[]{j, i});
-                break;
-            } else {
-                break;
-            }
-        }
-
-        //top right
-        for (int j = x + 1, i = y - 1; i >= 0 && j < 8; i--, j++) {
-            var nextCell = chessField[j][i];
-            if (nextCell == 10) {
-                possibleMoves.add(new int[]{j, i});
-            } else if (!isSameColor(nextCell, chessField[x][y])) {
-                possibleMoves.add(new int[]{j, i});
-                break;
-
-            } else {
-                break;
-            }
-        }
-
-        //bottom left
-        for (int j = x - 1, i = y + 1; i < 8 && j >= 0; i++, j--) {
-            var nextCell = chessField[j][i];
-            if (nextCell == 10) {
-                possibleMoves.add(new int[]{j, i});
-            } else if (!isSameColor(nextCell, chessField[x][y])) {
-                possibleMoves.add(new int[]{j, i});
-                break;
-
-            } else {
-                break;
-            }
-        }
-
-        return possibleMoves;
-    }
-
-    public ArrayList<int[]> getPossibleMovesKnight(int x, int y, int[][] chessField) {
-        var possibleMoves = new ArrayList<int[]>();
-        if (y + 2 < 8 && x + 1 < 8 && chessField[x + 1][y + 2] == 10) possibleMoves.add(new int[]{x + 1, y + 2});
-        else if (y + 2 < 8 && x + 1 < 8 && !isSameColor(chessField[x][y], chessField[x + 1][y + 2]))
-            possibleMoves.add(new int[]{x + 1, y + 2});
-
-        if (y + 2 < 8 && x - 1 >= 0 && chessField[x - 1][y + 2] == 10) possibleMoves.add(new int[]{x - 1, y + 2});
-        else if (y + 2 < 8 && x - 1 >= 0 && !isSameColor(chessField[x][y], chessField[x - 1][y + 2]))
-            possibleMoves.add(new int[]{x - 1, y + 2});
-
-        if (x + 2 < 8 && y + 1 < 8 && chessField[x + 2][y + 1] == 10) possibleMoves.add(new int[]{x + 2, y + 1});
-        else if (x + 2 < 8 && y + 1 < 8 && !isSameColor(chessField[x][y], chessField[x + 2][y + 1]))
-            possibleMoves.add(new int[]{x + 2, y + 1});
-        if (x - 2 >= 0 && y + 1 < 8 && chessField[x - 2][y + 1] == 10) possibleMoves.add(new int[]{x - 2, y + 1});
-        else if (x - 2 >= 0 && y + 1 < 8 && !isSameColor(chessField[x][y], chessField[x - 2][y + 1]))
-            possibleMoves.add(new int[]{x - 2, y + 1});
-        if (y - 2 >= 0 && x + 1 < 8 && chessField[x + 1][y - 2] == 10) possibleMoves.add(new int[]{x + 1, y - 2});
-        else if (y - 2 >= 0 && x + 1 < 8 && !isSameColor(chessField[x][y], chessField[x + 1][y - 2]))
-            possibleMoves.add(new int[]{x + 1, y - 2});
-
-        if (y - 2 >= 0 && x - 1 >= 0 && chessField[x - 1][y - 2] == 10) possibleMoves.add(new int[]{x - 1, y - 2});
-        else if (y - 2 >= 0 && x - 1 >= 0 && !isSameColor(chessField[x][y], chessField[x - 1][y - 2]))
-            possibleMoves.add(new int[]{x - 1, y - 2});
-
-        if (y - 1 >= 0 && x + 2 < 8 && chessField[x + 2][y - 1] == 10) possibleMoves.add(new int[]{x + 2, y - 1});
-        else if (y - 1 >= 0 && x + 2 < 8 && !isSameColor(chessField[x][y], chessField[x + 2][y - 1]))
-            possibleMoves.add(new int[]{x + 2, y - 1});
-
-        if (y - 1 >= 0 && x - 2 >= 0 && chessField[x - 2][y - 1] == 10) possibleMoves.add(new int[]{x - 2, y - 1});
-        else if (y - 1 >= 0 && x - 2 >= 0 && !isSameColor(chessField[x][y], chessField[x - 2][y - 1]))
-            possibleMoves.add(new int[]{x - 2, y - 1});
-        return possibleMoves;
-    }
-
-    public ArrayList<int[]> getPossibleMovesRook(int x, int y, int[][] chessField) {
-        var possibleMoves = new ArrayList<int[]>();
-        //top
-        for (int i = y - 1; i >= 0; i--) {
-            var nextCell = chessField[x][i];
-            if (nextCell == 10) {
-                possibleMoves.add(new int[]{x, i});
-            } else if (!isSameColor(chessField[x][y], nextCell)) {
-                possibleMoves.add(new int[]{x, i});
-                break;
-            } else {
-                break;
-            }
-        }
-        //bot
-        for (int i = y + 1; i < 8; i++) {
-            var nextCell = chessField[x][i];
-            if (nextCell == 10) {
-                possibleMoves.add(new int[]{x, i});
-            } else if (!isSameColor(chessField[x][y], nextCell)) {
-                possibleMoves.add(new int[]{x, i});
-                break;
-            } else {
-                break;
-            }
-        }
-        //left
-        for (int i = x - 1; i >= 0; i--) {
-            var nextCell = chessField[i][y];
-            if (nextCell == 10) {
-                possibleMoves.add(new int[]{i, y});
-            } else if (!isSameColor(chessField[x][y], nextCell)) {
-                possibleMoves.add(new int[]{i, y});
-                break;
-            } else {
-                break;
-            }
-        }
-        //right
-        for (int i = x + 1; i < 8; i++) {
-            var nextCell = chessField[i][y];
-            if (nextCell == 10) {
-                possibleMoves.add(new int[]{i, y});
-            } else if (!isSameColor(chessField[x][y], nextCell)) {
-                possibleMoves.add(new int[]{i, y});
-                break;
-            } else {
-                break;
-            }
-        }
-        return possibleMoves;
-    }
-
-    public ArrayList<int[]> getPossibleMovesQueen(int x, int y, int[][] chessField) {
-        var possibleMoves = new ArrayList<int[]>();
-        possibleMoves.addAll(getPossibleMovesRook(x, y, chessField));
-        possibleMoves.addAll(getPossibleMovesBishop(x, y, chessField));
-        return possibleMoves;
-    }
-
-    public ArrayList<int[]> getPossibleMovesKing(int x, int y, int[][] chessField) {
-        var possibleMoves = new ArrayList<int[]>();
-
-
-        if (y < 7 && (chessField[x][y + 1] == 10 || !isSameColor(chessField[x][y + 1], chessField[x][y])))
-            possibleMoves.add(new int[]{x, y + 1});
-
-        if (y > 0 && (chessField[x][y - 1] == 10 || !isSameColor(chessField[x][y - 1], chessField[x][y])))
-            possibleMoves.add(new int[]{x, y - 1});
-
-        if (x < 7 && (chessField[x + 1][y] == 10 || !isSameColor(chessField[x + 1][y], chessField[x][y])))
-            possibleMoves.add(new int[]{x + 1, y});
-
-        if (x > 0 && (chessField[x - 1][y] == 10 || !isSameColor(chessField[x - 1][y], chessField[x][y])))
-            possibleMoves.add(new int[]{x - 1, y});
-
-        //top right
-        if (y > 0 && x < 7 && (chessField[x + 1][y - 1] == 10 || !isSameColor(chessField[x + 1][y - 1], chessField[x][y])))
-            possibleMoves.add(new int[]{x + 1, y - 1});
-        //top left
-        if (y > 0 && x > 0 && (chessField[x - 1][y - 1] == 10 || !isSameColor(chessField[x - 1][y - 1], chessField[x][y])))
-            possibleMoves.add(new int[]{x - 1, y - 1});
-        //bottom left
-        if (y < 7 && x > 0 && (chessField[x - 1][y + 1] == 10 || !isSameColor(chessField[x - 1][y + 1], chessField[x][y])))
-            possibleMoves.add(new int[]{x - 1, y + 1});
-        //bottom right
-        if (y < 7 && x < 7 && (chessField[x + 1][y + 1] == 10 || !isSameColor(chessField[x + 1][y + 1], chessField[x][y])))
-            possibleMoves.add(new int[]{x + 1, y + 1});
-
-        if (canCastling(false)) {
-            if (getFiguresColor(field[x][y]).equals("WHITE")) {
-                possibleMoves.add(new int[]{2, 7});
-            } else {
-                possibleMoves.add(new int[]{2, 0});
-            }
-        }
-        if (canCastling(true)) {
-            if (getFiguresColor(field[x][y]).equals("WHITE")) {
-                possibleMoves.add(new int[]{6, 7});
-            } else {
-                possibleMoves.add(new int[]{6, 0});
-            }
-        }
-
-        return possibleMoves;
-    }
-
     private void nextColor() {
         if (currentColor.equals("WHITE")) {
             currentColor = "BLACK";
         } else {
             currentColor = "WHITE";
         }
-    }
-
-    private String getFiguresColor(int code) {
-        return (code < 17 && code > 10) ? "BLACK" : "WHITE";
     }
 
     private boolean isCheck(String color, int[][] chessField) {
@@ -573,10 +318,9 @@ public class Game {
         if (!isShort) {
             return !kingMoved && !rockMoved && field[1][y] == 10 && field[2][y] == 10 && field[3][y] == 10;
         } else {
-            return !kingMoved && !rockMoved &&  field[5][y] == 10 && field[6][y] == 10;
+            return !kingMoved && !rockMoved && field[5][y] == 10 && field[6][y] == 10;
         }
     }
-
 
     private boolean isLongCastlingMove(int x) {
         if (field[selection.x][selection.y] == 16 || field[selection.x][selection.y] == 26) {
@@ -594,28 +338,44 @@ public class Game {
 
     private void validateLongCastling() {
         int y = (currentColor.equals("WHITE")) ? 7 : 0;
-        if(isCheck(currentColor, field)) {
+        if (isCheck(currentColor, field)) {
             selection.possibleMoves = selection.possibleMoves.stream().filter(m -> !(m[0] == 2 && m[1] == y)).collect(Collectors.toList());
         }
         var copy = deepCopy(field);
         copy[3][y] = copy[4][y];
         copy[4][y] = 10;
-        if(isCheck(currentColor, copy)) {
+        if (isCheck(currentColor, copy)) {
             selection.possibleMoves = selection.possibleMoves.stream().filter(m -> !(m[0] == 2 && m[1] == y)).collect(Collectors.toList());
         }
     }
 
     private void validateShortCastling() {
         int y = (currentColor.equals("WHITE")) ? 7 : 0;
-        if(isCheck(currentColor, field)) {
+        if (isCheck(currentColor, field)) {
             selection.possibleMoves = selection.possibleMoves.stream().filter(m -> !(m[0] == 6 && m[1] == y)).collect(Collectors.toList());
         }
         var copy = deepCopy(field);
         copy[5][y] = copy[4][y];
         copy[4][y] = 10;
-        if(isCheck(currentColor, copy)) {
+        if (isCheck(currentColor, copy)) {
             selection.possibleMoves = selection.possibleMoves.stream().filter(m -> !(m[0] == 6 && m[1] == y)).collect(Collectors.toList());
         }
+    }
+
+    public MouseHandler getMouseHandler() {
+        return mouseHandler;
+    }
+
+    public static int[][] deepCopy(int[][] org) {
+        if (org == null) {
+            return null;
+        }
+
+        final int[][] res = new int[org.length][];
+        for (int i = 0; i < org.length; i++) {
+            res[i] = Arrays.copyOf(org[i], org[i].length);
+        }
+        return res;
     }
 
 
