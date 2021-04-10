@@ -26,27 +26,55 @@ public class Bot {
         //var figures = game.getAllFiguresByColor(game.currentColor);
 
         int bestScore = 0;
+        int bestEnemyScore = 0;
         Integer[] bestFigure = new Integer[2];
         int[] bestMove = new int[2];
-        for (int i = 0; i < figures.size(); i++) {
-            var moves = game.getValidPossibleMoves(figures.get(i)[0], figures.get(i)[1], game.getPossibleMoves(figures.get(i)[0], figures.get(i)[1], game.field));
-            for (int j = 0; j < moves.size(); j++) {
-                int score = FigureUtils.figuresValue.get(game.field[moves.get(j)[0]][moves.get(j)[1]]);
+        for (Integer[] integers : figures) {
+            var moves = game.getValidPossibleMoves(integers[0], integers[1], game.getPossibleMoves(integers[0], integers[1], game.field));
+            for (int[] move : moves) {
+                int score = FigureUtils.figuresValue.get(game.field[move[0]][move[1]]);
                 if (score > bestScore) {
                     bestScore = score;
-                    bestFigure = figures.get(i);
-                    bestMove = moves.get(j);
+                    bestFigure = integers;
+                    bestMove = move;
                     game.selection.x = bestFigure[0];
                     game.selection.y = bestFigure[1];
                 }
             }
         }
 
-        if(bestScore > 0) {
-            System.out.printf("Figure from %s%s to %s%s\n", nameOfLettersX.get(game.selection.x), nameOfLettersY.get(game.selection.y), nameOfLettersX.get(bestMove[0]), nameOfLettersY.get(bestMove[1]));
-            game.field[bestMove[0]][bestMove[1]] = game.field[bestFigure[0]][bestFigure[1]];
-            game.field[bestFigure[0]][bestFigure[1]] = 10;
-            game.history.add(new int[]{bestMove[0], bestMove[1], bestFigure[0], bestFigure[1]});
+        if (bestScore > 0) {
+            int[][] copyField = Game.deepCopy(game.field);
+            copyField[bestMove[0]][bestMove[1]] = copyField[bestFigure[0]][bestFigure[1]];
+            copyField[bestFigure[0]][bestFigure[1]] = 10;
+            var nextColor = (game.currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
+
+            var figuresEnemy = game.getAllFiguresByColor(nextColor)
+                    .stream()
+                    .filter(figure -> game.getValidPossibleMoves(figure[0], figure[1], game.getPossibleMoves(figure[0], figure[1], copyField)).size() > 0)
+                    .collect(Collectors.toList());
+
+            for (Integer[] integers : figuresEnemy) {
+                var moves = game.getValidPossibleMoves(integers[0], integers[1], game.getPossibleMoves(integers[0], integers[1], copyField));
+                for (int[] move : moves) {
+                    int score = FigureUtils.figuresValue.get(copyField[move[0]][move[1]]);
+                    if (score > bestEnemyScore) {
+                        bestEnemyScore = score;
+                    }
+                }
+            }
+
+            if (bestScore >= bestEnemyScore) {
+                System.out.printf("Figure from %s%s to %s%s\n", nameOfLettersX.get(game.selection.x), nameOfLettersY.get(game.selection.y), nameOfLettersX.get(bestMove[0]), nameOfLettersY.get(bestMove[1]));
+                game.field[bestMove[0]][bestMove[1]] = game.field[bestFigure[0]][bestFigure[1]];
+                game.field[bestFigure[0]][bestFigure[1]] = 10;
+                game.history.add(new int[]{bestMove[0], bestMove[1], bestFigure[0], bestFigure[1]});
+                //game.changePawnToQueen(bestMove[0], bestMove[1]);
+            } else {
+                //TODO
+            }
+
+
         } else {
             var randomFigureIndex = ThreadLocalRandom.current().nextInt(0, figures.size());
             var selectedFigure = figures.get(randomFigureIndex);
@@ -59,6 +87,7 @@ public class Bot {
             game.field[randomMove[0]][randomMove[1]] = game.field[selectedFigure[0]][selectedFigure[1]];
             game.field[selectedFigure[0]][selectedFigure[1]] = 10;
             game.history.add(new int[]{randomMove[0], randomMove[1], selectedFigure[0], selectedFigure[1]});
+            //game.changePawnToQueen(bestMove[0], bestMove[1]);
         }
         game.nextColor();
 

@@ -26,7 +26,7 @@ public class Game implements Runnable{
 
 
         players.add(new BotPlayer("botPlayer", this));
-        players.add(new BotPlayer("botPlayer2", this));
+        players.add(new Player("Player"));
 
 
         mouseHandler.addOnPressedListener((MouseEvent event) -> {
@@ -65,7 +65,7 @@ public class Game implements Runnable{
                 if (currentPlayer instanceof BotPlayer) {
                     ((BotPlayer) currentPlayer).makeMove();
                 }
-                Thread.sleep(150);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -252,7 +252,7 @@ public class Game implements Runnable{
             int[][] copyField = deepCopy(field);
             copyField[move[0]][move[1]] = copyField[x][y];
             copyField[x][y] = 10;
-            var nextColor = (currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
+            //var nextColor = (currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
             if (!isCheck(currentColor, copyField)) {
                 validMoves.add(move);
             }
