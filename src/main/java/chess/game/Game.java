@@ -6,15 +6,12 @@ import chess.game.player.PlayerType;
 import chess.input.MouseHandler;
 
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static chess.game.FigureUtils.*;
 
-public class Game implements Runnable {
+public class Game implements Runnable{
 
     public final int[][] field = new int[8][8];
     public final Selection selection = new Selection(0, 0, false);
@@ -46,10 +43,8 @@ public class Game implements Runnable {
             selection.mouseX = event.getX();
             selection.mouseY = event.getY();
         });
-
         new Thread(this).start();
     }
-
     public static int[][] deepCopy(int[][] org) {
         if (org == null) {
             return null;
@@ -204,6 +199,7 @@ public class Game implements Runnable {
             }
             selection.selected = true;
         }
+        changePawnToQueen(cellX, cellY);
 
     }
 
@@ -224,6 +220,7 @@ public class Game implements Runnable {
         int cellX = (x - 50) / 100;
         int cellY = (y - 50) / 100;
         if (x < 850 && x > 50 && y > 50 && y < 850) {
+//            System.out.printf("cell coordinates: %d %d \n", cellX, cellY);
             return new int[]{cellX, cellY};
         }
         return null;
@@ -382,6 +379,21 @@ public class Game implements Runnable {
         return mouseHandler;
     }
 
+    public void changePawnToQueen(int x, int y) {
+        int min, max;
+        if (field[x][y] == 21 && y == 0) {
+            min = 22;
+            max = 25;
+            int randomFigure = (int) Math.floor(Math.random() * (max - min + 1) + min);
+            field[x][y] = randomFigure;
+
+        } else if (field[x][y] == 11 && y == 7) {
+            min = 12;
+            max = 15;
+            int randomFigure = (int) Math.floor(Math.random() * (max - min + 1) + min);
+            field[x][y] = randomFigure;
+        }
+    }
     public void printFiled() {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
@@ -391,4 +403,6 @@ public class Game implements Runnable {
             System.out.println();
         }
     }
+
+
 }

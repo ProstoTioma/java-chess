@@ -10,6 +10,7 @@ public class FigureUtils {
     public static Map<Integer, String> nameOfLettersX = new HashMap<>();
     public static Map<Integer, String> nameOfLettersY = new HashMap<>();
 
+
     static {
         figuresMap.put(11, "bp");
         figuresMap.put(12, "br");
@@ -53,7 +54,7 @@ public class FigureUtils {
 
     public static ArrayList<int[]> getPossibleMovesPawn(int x, int y, int[][] chessField) {
         var possibleMoves = new ArrayList<int[]>();
-        if (chessField[x][y] == 11) {
+        if (chessField[x][y] == 11 && y != 7) {
             if (chessField[x][y + 1] == 10) possibleMoves.add(new int[]{x, y + 1});
             if (x > 0 && (!isSameColor(chessField[x - 1][y + 1], chessField[x][y]) && chessField[x - 1][y + 1] != 10))
                 possibleMoves.add(new int[]{x - 1, y + 1});
@@ -61,7 +62,7 @@ public class FigureUtils {
                 possibleMoves.add(new int[]{x + 1, y + 1});
             if (y == 1 && chessField[x][y + 1] == 10 && chessField[x][y + 2] == 10)
                 possibleMoves.add(new int[]{x, y + 2});
-        } else {
+        } else if(y != 0){
             if (chessField[x][y - 1] == 10) possibleMoves.add(new int[]{x, y - 1});
             if (x > 0 && (!isSameColor(chessField[x - 1][y - 1], chessField[x][y]) && chessField[x - 1][y - 1] != 10))
                 possibleMoves.add(new int[]{x - 1, y - 1});

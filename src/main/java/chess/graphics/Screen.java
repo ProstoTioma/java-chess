@@ -118,6 +118,8 @@ public class Screen extends Canvas {
         drawSideBar(g);
         drawDragAndDrop(g);
 
+        //drawFigureSelectionPopup(g);
+
         g.dispose();
         strategy.show();
     }
