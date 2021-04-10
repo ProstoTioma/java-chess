@@ -13,7 +13,7 @@ public class BotPlayer extends Player {
         bot = new Bot(g);
     }
 
-    public void makeMove() {
+    public void makeMove() throws InterruptedException {
         bot.makeBotMove();
     }
 }

@@ -216,6 +216,12 @@ public class Game implements Runnable{
         return figuresList;
     }
 
+    public static String getFiguresColor(int code) {
+        if(code < 17 && code > 10) return "BLACK";
+        else if(code > 17) return "WHITE";
+        else return "VOID";
+    }
+
     public int[] getCellCoordinates(int x, int y) {
         int cellX = (x - 50) / 100;
         int cellY = (y - 50) / 100;

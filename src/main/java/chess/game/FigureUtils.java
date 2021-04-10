@@ -4,14 +4,31 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import static chess.game.Game.getFiguresColor;
+
 public class FigureUtils {
 
     public static Map<Integer, String> figuresMap = new HashMap<>();
+    public static Map<Integer, Integer> figuresValue = new HashMap<>();
     public static Map<Integer, String> nameOfLettersX = new HashMap<>();
     public static Map<Integer, String> nameOfLettersY = new HashMap<>();
 
 
     static {
+        figuresValue.put(10, 0);
+        figuresValue.put(11, 1);
+        figuresValue.put(12, 5);
+        figuresValue.put(13, 3);
+        figuresValue.put(14, 3);
+        figuresValue.put(15, 9);
+        figuresValue.put(16, 100);
+        figuresValue.put(21, 1);
+        figuresValue.put(22, 5);
+        figuresValue.put(23, 3);
+        figuresValue.put(24, 3);
+        figuresValue.put(25, 9);
+        figuresValue.put(26, 100);
+
         figuresMap.put(11, "bp");
         figuresMap.put(12, "br");
         figuresMap.put(13, "bn");
@@ -46,10 +63,6 @@ public class FigureUtils {
 
     public static boolean isSameColor(int firstFigure, int secondFigure) {
         return firstFigure < 17 && firstFigure > 10 && secondFigure < 17 && secondFigure > 10 || firstFigure > 17 && secondFigure > 17;
-    }
-
-    public static String getFiguresColor(int code) {
-        return (code < 17 && code > 10) ? "BLACK" : "WHITE";
     }
 
     public static ArrayList<int[]> getPossibleMovesPawn(int x, int y, int[][] chessField) {
@@ -260,14 +273,14 @@ public class FigureUtils {
         if (canLongCastling) {
             if (getFiguresColor(chessField[x][y]).equals("WHITE")) {
                 possibleMoves.add(new int[]{2, 7});
-            } else {
+            } else if(getFiguresColor(chessField[x][y]).equals("BLACK")){
                 possibleMoves.add(new int[]{2, 0});
             }
         }
         if (canShortCastling) {
             if (getFiguresColor(chessField[x][y]).equals("WHITE")) {
                 possibleMoves.add(new int[]{6, 7});
-            } else {
+            } else if(getFiguresColor(chessField[x][y]).equals("BLACK")){
                 possibleMoves.add(new int[]{6, 0});
             }
         }
