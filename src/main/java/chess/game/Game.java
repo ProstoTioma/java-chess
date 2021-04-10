@@ -188,7 +188,6 @@ public class Game {
                 selection.possibleMoves = Collections.emptyList();
             }
             selection.selected = true;
-//            System.out.printf("Selected %d %d\n", selection.x, selection.y);
         }
 
     }
@@ -197,20 +196,9 @@ public class Game {
         int cellX = (x - 50) / 100;
         int cellY = (y - 50) / 100;
         if (x < 850 && x > 50 && y > 50 && y < 850) {
-//            System.out.printf("cell coordinates: %d %d \n", cellX, cellY);
             return new int[]{cellX, cellY};
         }
         return null;
-    }
-
-    public void printFiled() {
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                System.out.printf(" %d ", field[j][i]);
-            }
-
-            System.out.println();
-        }
     }
 
     public ArrayList<int[]> getPossibleMoves(int x, int y, int[][] chessField) {
@@ -376,6 +364,16 @@ public class Game {
             res[i] = Arrays.copyOf(org[i], org[i].length);
         }
         return res;
+    }
+
+    public void printFiled() {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                System.out.printf(" %d ", field[j][i]);
+            }
+
+            System.out.println();
+        }
     }
 
 

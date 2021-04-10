@@ -44,7 +44,6 @@ public class Screen extends Canvas {
         JFrame container = new JFrame("Chess");
 
         JPanel panel = (JPanel) container.getContentPane();
-        //panel.addMouseListener(new MouseHandler());
         panel.setPreferredSize(new Dimension(width, height));
         panel.setLayout(null);
 
@@ -63,9 +62,6 @@ public class Screen extends Canvas {
                 System.exit(0);
             }
         });
-        //  container.addMouseListener(new MouseHandler());
-
-        //    requestFocus();
 
         createBufferStrategy(2);
         strategy = getBufferStrategy();
@@ -101,9 +97,8 @@ public class Screen extends Canvas {
 
     public void gameLoop() throws InterruptedException, IOException {
         while (true) {
-            Thread.sleep(10);
+            Thread.sleep(20);
             draw();
-            // wait for input
         }
     }
 
