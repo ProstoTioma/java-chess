@@ -114,12 +114,12 @@ public class Screen extends Canvas {
         drawLetters(g);
         drawChessBoard(g);
         drawSelection(g);
+        highlightLastMove(g);
         drawPossibleMoves(g);
         drawCellBorder(g);
         drawChessField(g);
         drawSideBar(g);
         drawDragAndDrop(g);
-
 
         g.dispose();
         strategy.show();
@@ -200,21 +200,7 @@ public class Screen extends Canvas {
     private void drawSelection(Graphics2D g) {
         var isSelected = game.selection.selected;
         if (isSelected) {
-            if (game.selection.y % 2 == 0) {
-                if (game.selection.x % 2 != 0) {
-                    g.setColor(new Color(130, 146, 192));
-                } else {
-                    g.setColor(new Color(182, 206, 220));
-                }
-            } else {
-                if (game.selection.x % 2 == 0) {
-                    g.setColor(new Color(130, 146, 192));
-                } else {
-                    g.setColor(new Color(182, 206, 220));
-                }
-            }
-
-            g.fillRect((game.selection.x * 100) + 50, (game.selection.y * 100) + 50, 100, 100);
+            highlightCell(g, game.selection.x, game.selection.y);
         }
     }
 
@@ -255,6 +241,42 @@ public class Screen extends Canvas {
             var coords = game.getCellCoordinates(game.selection.mouseX, game.selection.mouseY);
             if (coords != null) g.drawRoundRect((coords[0] * 100) + 50, (coords[1] * 100) + 50, 100, 100, 5, 5);
         }
+    }
+
+    private void highlightCell(Graphics2D g, int x, int y) {
+        if (y % 2 == 0) {
+            if (x % 2 != 0) {
+                g.setColor(new Color(130, 146, 192));
+            } else {
+                g.setColor(new Color(182, 206, 220));
+            }
+        } else {
+            if (x % 2 == 0) {
+                g.setColor(new Color(130, 146, 192));
+            } else {
+                g.setColor(new Color(182, 206, 220));
+            }
+        }
+        g.fillRect((x * 100) + 50, (y * 100) + 50, 100, 100);
+    }
+
+    private void highlightLastMove(Graphics2D g) {
+        if (!game.history.isEmpty()) {
+            var lastMove = game.history.get(game.history.size() - 1);
+            highlightCell(g, lastMove[0], lastMove[1]);
+            highlightCell(g, lastMove[2], lastMove[3]);
+
+        }
+    }
+
+    //TODO
+    private void drawFigureSelectionPopup(Graphics2D g) throws IOException {
+        g.setColor(Color.WHITE);
+        g.fillRoundRect((5 * 100) + 50, 50, 100, 400, 10, 10);
+        drawImage(g, "bn", (5 * 100) + 50, 50);
+        drawImage(g, "bb", (5 * 100) + 50, 150);
+        drawImage(g, "br", (5 * 100) + 50, 250);
+        drawImage(g, "bq", (5 * 100) + 50, 350);
     }
 
 }

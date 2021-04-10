@@ -4,6 +4,7 @@ import chess.input.MouseHandler;
 
 import java.awt.event.MouseEvent;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Game {
 
@@ -56,19 +57,24 @@ public class Game {
         mouseHandler = new MouseHandler((MouseEvent event) -> {
             move(event.getX(), event.getY());
         }, (MouseEvent event) -> {
-            var coords = getCellCoordinates(event.getX(), event.getY());
-            int cellX = coords[0];
-            int cellY = coords[1];
+            try {
+                var coords = getCellCoordinates(event.getX(), event.getY());
+                int cellX = coords[0];
+                int cellY = coords[1];
 
-            if (selection.isDragAndDrop) {
-                selection.possibleMoves.forEach((move) -> {
-                    if (move[0] == cellX && move[1] == cellY) {
-                        moveSelectedFigure(cellX, cellY);
-                    }
-                });
+                if (selection.isDragAndDrop) {
+                    selection.possibleMoves.forEach((move) -> {
+                        if (move[0] == cellX && move[1] == cellY) {
+                            moveSelectedFigure(cellX, cellY);
+                        }
+                    });
 
+                }
+            } finally {
+                selection.isDragAndDrop = false;
             }
-            selection.isDragAndDrop = false;
+
+
         }, (MouseEvent event) -> {
             selection.mouseX = event.getX();
             selection.mouseY = event.getY();
@@ -140,6 +146,13 @@ public class Game {
 
     private void moveSelectedFigure(int cellX, int cellY) {
         field[cellX][cellY] = field[selection.x][selection.y];
+        if (isLongCastlingMove(cellX)) {
+            field[cellX + 1][cellY] = field[0][cellY];
+            field[0][cellY] = 10;
+        } else if (isShortCastlingMove(cellX)) {
+            field[cellX - 1][cellY] = field[7][cellY];
+            field[7][cellY] = 10;
+        }
         field[selection.x][selection.y] = 10;
         nextColor();
         //isCheck(currentColor, field);
@@ -147,7 +160,7 @@ public class Game {
         System.out.printf("Figure from %s%s to %s%s\n", nameOfLettersX.get(selection.x), nameOfLettersY.get(selection.y), nameOfLettersX.get(cellX), nameOfLettersY.get(cellY));
         selection.selected = false;
         var nextColor = (currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
-        if(isMate()) System.out.println("Mate! Winner: " + nextColor);
+        if (isMate()) System.out.println("Mate! Winner: " + nextColor);
 
     }
 
@@ -177,8 +190,15 @@ public class Game {
             if (!actionMade && field[cellX][cellY] != 10) {
                 selection.x = cellX;
                 selection.y = cellY;
-                if (currentColor.equals(getFiguresColor(field[selection.x][selection.y])))
+                if (currentColor.equals(getFiguresColor(field[selection.x][selection.y]))) {
                     selection.possibleMoves = getValidPossibleMoves(selection.x, selection.y, getPossibleMoves(selection.x, selection.y, field));
+                    if ((cell == 16 || cell == 26) && canCastling(false)) {
+                        validateLongCastling();
+                    }
+                    if ((cell == 16 || cell == 26) && canCastling(true)) {
+                        validateShortCastling();
+                    }
+                }
                 else {
                     selection.possibleMoves = Collections.emptyList();
                 }
@@ -192,6 +212,12 @@ public class Game {
             selection.y = cellY;
             if (getFiguresColor(cell).equals(currentColor)) {
                 selection.possibleMoves = getValidPossibleMoves(selection.x, selection.y, getPossibleMoves(cellX, cellY, field));
+                if ((cell == 16 || cell == 26) && canCastling(false)) {
+                    validateLongCastling();
+                }
+                if ((cell == 16 || cell == 26) && canCastling(true)) {
+                    validateShortCastling();
+                }
                 selection.isDragAndDrop = true;
             } else {
                 selection.possibleMoves = Collections.emptyList();
@@ -221,7 +247,7 @@ public class Game {
         if (chessField[x][y] == 11 || chessField[x][y] == 21) possibleMoves = getPossibleMovesPawn(x, y, chessField);
         if (chessField[x][y] == 13 || chessField[x][y] == 23) possibleMoves = getPossibleMovesKnight(x, y, chessField);
         if (chessField[x][y] == 14 || chessField[x][y] == 24) possibleMoves = getPossibleMovesBishop(x, y, chessField);
-        if (chessField[x][y] == 12 || chessField[x][y] == 22) possibleMoves = getPossibleMovesRook(x, y,chessField);
+        if (chessField[x][y] == 12 || chessField[x][y] == 22) possibleMoves = getPossibleMovesRook(x, y, chessField);
         if (chessField[x][y] == 15 || chessField[x][y] == 25) possibleMoves = getPossibleMovesQueen(x, y, chessField);
         if (chessField[x][y] == 16 || chessField[x][y] == 26) possibleMoves = getPossibleMovesKing(x, y, chessField);
 
@@ -253,14 +279,16 @@ public class Game {
                 possibleMoves.add(new int[]{x - 1, y + 1});
             if (x < 7 && (!isSameColor(chessField[x + 1][y + 1], chessField[x][y]) && chessField[x + 1][y + 1] != 10))
                 possibleMoves.add(new int[]{x + 1, y + 1});
-            if (y == 1 && chessField[x][y + 1] == 10 && chessField[x][y + 2] == 10) possibleMoves.add(new int[]{x, y + 2});
+            if (y == 1 && chessField[x][y + 1] == 10 && chessField[x][y + 2] == 10)
+                possibleMoves.add(new int[]{x, y + 2});
         } else {
             if (chessField[x][y - 1] == 10) possibleMoves.add(new int[]{x, y - 1});
             if (x > 0 && (!isSameColor(chessField[x - 1][y - 1], chessField[x][y]) && chessField[x - 1][y - 1] != 10))
                 possibleMoves.add(new int[]{x - 1, y - 1});
             if (x < 7 && (!isSameColor(chessField[x + 1][y - 1], chessField[x][y]) && chessField[x + 1][y - 1] != 10))
                 possibleMoves.add(new int[]{x + 1, y - 1});
-            if (y == 6 && chessField[x][y - 1] == 10 && chessField[x][y - 2] == 10) possibleMoves.add(new int[]{x, y - 2});
+            if (y == 6 && chessField[x][y - 1] == 10 && chessField[x][y - 2] == 10)
+                possibleMoves.add(new int[]{x, y - 2});
         }
 
         return possibleMoves;
@@ -423,30 +451,45 @@ public class Game {
         var possibleMoves = new ArrayList<int[]>();
 
 
-            if (y < 7 && (chessField[x][y + 1] == 10 || !isSameColor(chessField[x][y + 1], chessField[x][y])))
-                possibleMoves.add(new int[]{x, y + 1});
+        if (y < 7 && (chessField[x][y + 1] == 10 || !isSameColor(chessField[x][y + 1], chessField[x][y])))
+            possibleMoves.add(new int[]{x, y + 1});
 
-            if (y > 0 && (chessField[x][y - 1] == 10 || !isSameColor(chessField[x][y - 1], chessField[x][y])))
-                possibleMoves.add(new int[]{x, y - 1});
+        if (y > 0 && (chessField[x][y - 1] == 10 || !isSameColor(chessField[x][y - 1], chessField[x][y])))
+            possibleMoves.add(new int[]{x, y - 1});
 
-            if (x < 7 && (chessField[x + 1][y] == 10 || !isSameColor(chessField[x + 1][y], chessField[x][y])))
-                possibleMoves.add(new int[]{x + 1, y});
+        if (x < 7 && (chessField[x + 1][y] == 10 || !isSameColor(chessField[x + 1][y], chessField[x][y])))
+            possibleMoves.add(new int[]{x + 1, y});
 
-            if (x > 0 && (chessField[x - 1][y] == 10 || !isSameColor(chessField[x - 1][y], chessField[x][y])))
-                possibleMoves.add(new int[]{x - 1, y});
+        if (x > 0 && (chessField[x - 1][y] == 10 || !isSameColor(chessField[x - 1][y], chessField[x][y])))
+            possibleMoves.add(new int[]{x - 1, y});
 
-            //top right
-            if (y > 0 && x < 7 && (chessField[x + 1][y - 1] == 10 || !isSameColor(chessField[x + 1][y - 1], chessField[x][y])))
-                possibleMoves.add(new int[]{x + 1, y - 1});
-            //top left
-            if (y > 0 && x > 0 && (chessField[x - 1][y - 1] == 10 || !isSameColor(chessField[x - 1][y - 1], chessField[x][y])))
-                possibleMoves.add(new int[]{x - 1, y - 1});
-            //bottom left
-            if (y < 7 && x > 0 && (chessField[x - 1][y + 1] == 10 || !isSameColor(chessField[x - 1][y + 1], chessField[x][y])))
-                possibleMoves.add(new int[]{x - 1, y + 1});
-            //bottom right
-            if (y < 7 && x < 7 && (chessField[x + 1][y + 1] == 10 || !isSameColor(chessField[x + 1][y + 1], chessField[x][y])))
-                possibleMoves.add(new int[]{x + 1, y + 1});
+        //top right
+        if (y > 0 && x < 7 && (chessField[x + 1][y - 1] == 10 || !isSameColor(chessField[x + 1][y - 1], chessField[x][y])))
+            possibleMoves.add(new int[]{x + 1, y - 1});
+        //top left
+        if (y > 0 && x > 0 && (chessField[x - 1][y - 1] == 10 || !isSameColor(chessField[x - 1][y - 1], chessField[x][y])))
+            possibleMoves.add(new int[]{x - 1, y - 1});
+        //bottom left
+        if (y < 7 && x > 0 && (chessField[x - 1][y + 1] == 10 || !isSameColor(chessField[x - 1][y + 1], chessField[x][y])))
+            possibleMoves.add(new int[]{x - 1, y + 1});
+        //bottom right
+        if (y < 7 && x < 7 && (chessField[x + 1][y + 1] == 10 || !isSameColor(chessField[x + 1][y + 1], chessField[x][y])))
+            possibleMoves.add(new int[]{x + 1, y + 1});
+
+        if (canCastling(false)) {
+            if (getFiguresColor(field[x][y]).equals("WHITE")) {
+                possibleMoves.add(new int[]{2, 7});
+            } else {
+                possibleMoves.add(new int[]{2, 0});
+            }
+        }
+        if (canCastling(true)) {
+            if (getFiguresColor(field[x][y]).equals("WHITE")) {
+                possibleMoves.add(new int[]{6, 7});
+            } else {
+                possibleMoves.add(new int[]{6, 0});
+            }
+        }
 
         return possibleMoves;
     }
@@ -457,7 +500,6 @@ public class Game {
         } else {
             currentColor = "WHITE";
         }
-        //System.out.printf("%s players move\n", currentColor);
     }
 
     private String getFiguresColor(int code) {
@@ -514,6 +556,66 @@ public class Game {
             mate = false;
         }
         return mate;
+    }
+
+    private boolean canCastling(boolean isShort) {
+        boolean kingMoved = false;
+        boolean rockMoved = false;
+        int y = (currentColor.equals("WHITE")) ? 7 : 0;
+        int rockX = (isShort) ? 7 : 0;
+        for (int[] entry : history) {
+            if (entry[0] == 4 && entry[1] == y) {
+                kingMoved = true;
+            } else if (entry[0] == rockX && entry[1] == y) {
+                rockMoved = true;
+            }
+        }
+        if (!isShort) {
+            return !kingMoved && !rockMoved && field[1][y] == 10 && field[2][y] == 10 && field[3][y] == 10;
+        } else {
+            return !kingMoved && !rockMoved &&  field[5][y] == 10 && field[6][y] == 10;
+        }
+    }
+
+
+    private boolean isLongCastlingMove(int x) {
+        if (field[selection.x][selection.y] == 16 || field[selection.x][selection.y] == 26) {
+            return selection.x - x == 2;
+        }
+        return false;
+    }
+
+    private boolean isShortCastlingMove(int x) {
+        if (field[selection.x][selection.y] == 16 || field[selection.x][selection.y] == 26) {
+            return selection.x - x == -2;
+        }
+        return false;
+    }
+
+    private void validateLongCastling() {
+        int y = (currentColor.equals("WHITE")) ? 7 : 0;
+        if(isCheck(currentColor, field)) {
+            selection.possibleMoves = selection.possibleMoves.stream().filter(m -> !(m[0] == 2 && m[1] == y)).collect(Collectors.toList());
+        }
+        var copy = deepCopy(field);
+        copy[3][y] = copy[4][y];
+        copy[4][y] = 10;
+        if(isCheck(currentColor, copy)) {
+            selection.possibleMoves = selection.possibleMoves.stream().filter(m -> !(m[0] == 2 && m[1] == y)).collect(Collectors.toList());
+        }
+    }
+
+    private void validateShortCastling() {
+        int y = (currentColor.equals("WHITE")) ? 7 : 0;
+        if(isCheck(currentColor, field)) {
+            selection.possibleMoves = selection.possibleMoves.stream().filter(m -> !(m[0] == 6 && m[1] == y)).collect(Collectors.toList());
+        }
+        var copy = deepCopy(field);
+        copy[5][y] = copy[4][y];
+        copy[4][y] = 10;
+        if(isCheck(currentColor, copy)) {
+            selection.possibleMoves = selection.possibleMoves.stream().filter(m -> !(m[0] == 6 && m[1] == y)).collect(Collectors.toList());
+        }
     }
 
 

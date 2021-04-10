@@ -7,9 +7,9 @@ import java.util.function.Consumer;
 
 public class MouseHandler implements MouseListener, MouseMotionListener {
 
-    private Consumer<MouseEvent> onPressed;
-    private Consumer<MouseEvent> onReleased;
-    private Consumer<MouseEvent> onDragged;
+    private final Consumer<MouseEvent> onPressed;
+    private final Consumer<MouseEvent> onReleased;
+    private final Consumer<MouseEvent> onDragged;
 
     public MouseHandler(Consumer<MouseEvent> onPressed, Consumer<MouseEvent> onReleased, Consumer<MouseEvent> onDragged) {
         this.onPressed = onPressed;
@@ -25,14 +25,6 @@ public class MouseHandler implements MouseListener, MouseMotionListener {
     public void mousePressed(MouseEvent e) {
         onPressed.accept(e);
     }
-
-//    @Override
-//    public void mousePressed(MouseEvent e) {
-//
-//        game.move(e.x, e.y)
-//
-//    }
-
 
     @Override
     public void mouseReleased(MouseEvent e) {
