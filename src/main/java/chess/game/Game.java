@@ -1,5 +1,8 @@
 package chess.game;
 
+import chess.game.player.BotPlayer;
+import chess.game.player.Player;
+import chess.game.player.PlayerType;
 import chess.input.MouseHandler;
 
 import java.awt.event.MouseEvent;
@@ -11,25 +14,40 @@ import java.util.stream.Collectors;
 
 import static chess.game.FigureUtils.*;
 
-public class Game {
+public class Game implements Runnable {
 
     public final int[][] field = new int[8][8];
     public final Selection selection = new Selection(0, 0, false);
     private final MouseHandler mouseHandler = new MouseHandler();
     public String currentColor = "WHITE";
     public List<int[]> history = new ArrayList<>();
+    public List<Player> players = new ArrayList<>();
 
 
-    public Game() {
+    public Game() throws InterruptedException {
         initField();
 
-        mouseHandler.addOnPressedListener((MouseEvent event) -> move(event.getX(), event.getY()));
-        mouseHandler.addOnReleasedListener((MouseEvent event) ->
-                move(event.getX(), event.getY()));
+
+        players.add(new BotPlayer("botPlayer", this));
+        players.add(new Player("realPlayer"));
+
+
+        mouseHandler.addOnPressedListener((MouseEvent event) -> {
+            if (getCurrentPlayer().type == PlayerType.LOCAL) {
+                localPlayerMove(event.getX(), event.getY());
+            }
+        });
+        mouseHandler.addOnReleasedListener((MouseEvent event) -> {
+            if (getCurrentPlayer().type == PlayerType.LOCAL) {
+                localPlayerMove(event.getX(), event.getY());
+            }
+        });
         mouseHandler.addOnDraggedListener((MouseEvent event) -> {
             selection.mouseX = event.getX();
             selection.mouseY = event.getY();
         });
+
+        new Thread(this).start();
     }
 
     public static int[][] deepCopy(int[][] org) {
@@ -42,6 +60,25 @@ public class Game {
             res[i] = Arrays.copyOf(org[i], org[i].length);
         }
         return res;
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                var currentPlayer = getCurrentPlayer();
+                if (currentPlayer instanceof BotPlayer) {
+                    ((BotPlayer) currentPlayer).makeMove();
+                }
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private Player getCurrentPlayer() {
+        return currentColor.equals("WHITE") ? players.get(0) : players.get(1);
     }
 
     private void initField() {
@@ -96,7 +133,7 @@ public class Game {
 
     }
 
-    public void move(int x, int y) {
+    public void localPlayerMove(int x, int y) {
         // read input (mouse)
         var coords = getCellCoordinates(x, y);
         int cellX = coords[0];
@@ -170,6 +207,19 @@ public class Game {
 
     }
 
+    public List<Integer[]> getAllFiguresByColor(String color) {
+        var figuresList = new ArrayList<Integer[]>();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                var figure = field[j][i];
+                if (getFiguresColor(figure).equals(color)) {
+                    figuresList.add(new Integer[]{j, i});
+                }
+            }
+        }
+        return figuresList;
+    }
+
     public int[] getCellCoordinates(int x, int y) {
         int cellX = (x - 50) / 100;
         int cellY = (y - 50) / 100;
@@ -209,7 +259,7 @@ public class Game {
         return validMoves;
     }
 
-    private void nextColor() {
+    public void nextColor() {
         if (currentColor.equals("WHITE")) {
             currentColor = "BLACK";
         } else {
@@ -341,6 +391,4 @@ public class Game {
             System.out.println();
         }
     }
-
-
 }

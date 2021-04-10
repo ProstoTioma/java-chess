@@ -40,7 +40,7 @@ public class Screen extends Canvas {
     }
 
 
-    public Screen(int width, int height) {
+    public Screen(int width, int height) throws InterruptedException {
         this.width = width;
         this.height = height;
         JFrame container = new JFrame("Chess");
