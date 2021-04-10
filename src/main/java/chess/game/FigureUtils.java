@@ -273,14 +273,14 @@ public class FigureUtils {
         if (canLongCastling) {
             if (getFiguresColor(chessField[x][y]).equals("WHITE")) {
                 possibleMoves.add(new int[]{2, 7});
-            } else if(getFiguresColor(chessField[x][y]).equals("BLACK")){
+            } else {
                 possibleMoves.add(new int[]{2, 0});
             }
         }
         if (canShortCastling) {
             if (getFiguresColor(chessField[x][y]).equals("WHITE")) {
                 possibleMoves.add(new int[]{6, 7});
-            } else if(getFiguresColor(chessField[x][y]).equals("BLACK")){
+            } else {
                 possibleMoves.add(new int[]{6, 0});
             }
         }

@@ -17,9 +17,7 @@ public class Bot {
         this.game = game;
     }
 
-    //TODO
     public void makeBotMove() throws InterruptedException {
-        Thread.sleep(1000);
         //Random figure and random move
         var figures = game.getAllFiguresByColor(game.currentColor)
                 .stream()
