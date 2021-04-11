@@ -26,6 +26,7 @@ public class Game implements Runnable{
 
 
         players.add(new BotPlayer("botPlayer", this));
+        //players.add(new BotPlayer("botPlayer", this));
         players.add(new Player("Player"));
 
 
