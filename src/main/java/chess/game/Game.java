@@ -13,21 +13,20 @@ import static chess.game.FigureUtils.*;
 
 public class Game implements Runnable{
 
-    public final int[][] field = new int[8][8];
+    public final Integer[][] field = new Integer[8][8];
     public final Selection selection = new Selection(0, 0, false);
     private final MouseHandler mouseHandler = new MouseHandler();
     public String currentColor = "WHITE";
-    public List<int[]> history = new ArrayList<>();
+    public List<Integer[]> history = new ArrayList<>();
     public List<Player> players = new ArrayList<>();
 
 
     public Game() throws InterruptedException {
         initField();
 
-
         players.add(new BotPlayer("botPlayer", this));
-        //players.add(new BotPlayer("botPlayer", this));
-        players.add(new Player("Player"));
+        //players.add(new Player("Player"));
+        players.add(new BotPlayer("botPlayer2", this));
 
 
         mouseHandler.addOnPressedListener((MouseEvent event) -> {
@@ -46,12 +45,12 @@ public class Game implements Runnable{
         });
         new Thread(this).start();
     }
-    public static int[][] deepCopy(int[][] org) {
+    public static Integer[][] deepCopy(Integer[][] org) {
         if (org == null) {
             return null;
         }
 
-        final int[][] res = new int[org.length][];
+        final Integer[][] res = new Integer[org.length][];
         for (int i = 0; i < org.length; i++) {
             res[i] = Arrays.copyOf(org[i], org[i].length);
         }
@@ -66,7 +65,7 @@ public class Game implements Runnable{
                 if (currentPlayer instanceof BotPlayer) {
                     ((BotPlayer) currentPlayer).makeMove();
                 }
-                Thread.sleep(1000);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -84,8 +83,8 @@ public class Game implements Runnable{
         // 14/24 - bishop
         // 15/25 - queen
         // 16/26 - king
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
+        for (Integer i = 0; i < 8; i++) {
+            for (Integer j = 0; j < 8; j++) {
                 if (i == 1) field[j][i] = 11;
                 else if (i == 6) field[j][i] = 21;
                 else if (i == 0) {
@@ -109,7 +108,7 @@ public class Game implements Runnable{
 
     }
 
-    private void moveSelectedFigure(int cellX, int cellY) {
+    private void moveSelectedFigure(Integer cellX, Integer cellY) {
         field[cellX][cellY] = field[selection.x][selection.y];
         if (isLongCastlingMove(cellX)) {
             field[cellX + 1][cellY] = field[0][cellY];
@@ -121,7 +120,7 @@ public class Game implements Runnable{
         field[selection.x][selection.y] = 10;
         nextColor();
         //isCheck(currentColor, field);
-        history.add(new int[]{selection.x, selection.y, cellX, cellY});
+        history.add(new Integer[]{selection.x, selection.y, cellX, cellY});
         System.out.printf("Figure from %s%s to %s%s\n", nameOfLettersX.get(selection.x), nameOfLettersY.get(selection.y), nameOfLettersX.get(cellX), nameOfLettersY.get(cellY));
         selection.selected = false;
         var nextColor = (currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
@@ -129,11 +128,11 @@ public class Game implements Runnable{
 
     }
 
-    public void localPlayerMove(int x, int y) {
+    public void localPlayerMove(Integer x, Integer y) {
         // read input (mouse)
         var coords = getCellCoordinates(x, y);
-        int cellX = coords[0];
-        int cellY = coords[1];
+        Integer cellX = coords[0];
+        Integer cellY = coords[1];
         var cell = field[cellX][cellY];
 
         if (selection.isDragAndDrop) {
@@ -206,8 +205,8 @@ public class Game implements Runnable{
 
     public List<Integer[]> getAllFiguresByColor(String color) {
         var figuresList = new ArrayList<Integer[]>();
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
+        for (Integer i = 0; i < 8; i++) {
+            for (Integer j = 0; j < 8; j++) {
                 var figure = field[j][i];
                 if (getFiguresColor(figure).equals(color)) {
                     figuresList.add(new Integer[]{j, i});
@@ -217,24 +216,24 @@ public class Game implements Runnable{
         return figuresList;
     }
 
-    public static String getFiguresColor(int code) {
+    public static String getFiguresColor(Integer code) {
         if(code < 17 && code > 10) return "BLACK";
         else if(code > 17) return "WHITE";
         else return "VOID";
     }
 
-    public int[] getCellCoordinates(int x, int y) {
-        int cellX = (x - 50) / 100;
-        int cellY = (y - 50) / 100;
+    public Integer[] getCellCoordinates(Integer x, Integer y) {
+        Integer cellX = (x - 50) / 100;
+        Integer cellY = (y - 50) / 100;
         if (x < 850 && x > 50 && y > 50 && y < 850) {
 //            System.out.printf("cell coordinates: %d %d \n", cellX, cellY);
-            return new int[]{cellX, cellY};
+            return new Integer[]{cellX, cellY};
         }
         return null;
     }
 
-    public ArrayList<int[]> getPossibleMoves(int x, int y, int[][] chessField) {
-        var possibleMoves = new ArrayList<int[]>();
+    public ArrayList<Integer[]> getPossibleMoves(Integer x, Integer y, Integer[][] chessField) {
+        var possibleMoves = new ArrayList<Integer[]>();
         if (chessField[x][y] == 11 || chessField[x][y] == 21) possibleMoves = getPossibleMovesPawn(x, y, chessField);
         if (chessField[x][y] == 13 || chessField[x][y] == 23) possibleMoves = getPossibleMovesKnight(x, y, chessField);
         if (chessField[x][y] == 14 || chessField[x][y] == 24) possibleMoves = getPossibleMovesBishop(x, y, chessField);
@@ -246,11 +245,11 @@ public class Game implements Runnable{
         return possibleMoves;
     }
 
-    public ArrayList<int[]> getValidPossibleMoves(int x, int y, ArrayList<int[]> possibleMoves) {
-        ArrayList<int[]> validMoves = new ArrayList<>();
+    public ArrayList<Integer[]> getValidPossibleMoves(Integer x, Integer y, ArrayList<Integer[]> possibleMoves) {
+        ArrayList<Integer[]> validMoves = new ArrayList<>();
 
         possibleMoves.forEach((move) -> {
-            int[][] copyField = deepCopy(field);
+            Integer[][] copyField = deepCopy(field);
             copyField[move[0]][move[1]] = copyField[x][y];
             copyField[x][y] = 10;
             //var nextColor = (currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
@@ -271,10 +270,10 @@ public class Game implements Runnable{
         }
     }
 
-    private boolean isCheck(String color, int[][] chessField) {
-        int kingX = 0, kingY = 0;
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
+    private boolean isCheck(String color, Integer[][] chessField) {
+        Integer kingX = 0, kingY = 0;
+        for (Integer i = 0; i < 8; i++) {
+            for (Integer j = 0; j < 8; j++) {
                 if (color.equals(getFiguresColor(chessField[j][i]))) {
                     if (chessField[j][i] == 16 || chessField[j][i] == 26) {
                         kingX = j;
@@ -285,11 +284,11 @@ public class Game implements Runnable{
         }
         //check
         boolean check = false;
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
+        for (Integer i = 0; i < 8; i++) {
+            for (Integer j = 0; j < 8; j++) {
                 if (!getFiguresColor(chessField[j][i]).equals(color)) {
                     var moves = getPossibleMoves(j, i, chessField);
-                    for (int[] move : moves) {
+                    for (Integer[] move : moves) {
                         if (move[0] == kingX && move[1] == kingY) {
                             check = true;
                             //System.out.println("Check " + color);
@@ -305,8 +304,8 @@ public class Game implements Runnable{
     private boolean isMate() {
         boolean mate = true;
         if (isCheck(currentColor, field)) {
-            for (int i = 0; i < 8; i++) {
-                for (int j = 0; j < 8; j++) {
+            for (Integer i = 0; i < 8; i++) {
+                for (Integer j = 0; j < 8; j++) {
                     if (currentColor.equals(getFiguresColor(field[j][i]))) {
                         var moves = getValidPossibleMoves(j, i, getPossibleMoves(j, i, field));
                         if (!moves.isEmpty()) {
@@ -326,9 +325,9 @@ public class Game implements Runnable{
     private boolean canCastling(boolean isShort) {
         boolean kingMoved = false;
         boolean rockMoved = false;
-        int y = (currentColor.equals("WHITE")) ? 7 : 0;
-        int rockX = (isShort) ? 7 : 0;
-        for (int[] entry : history) {
+        Integer y = (currentColor.equals("WHITE")) ? 7 : 0;
+        Integer rockX = (isShort) ? 7 : 0;
+        for (Integer[] entry : history) {
             if (entry[0] == 4 && entry[1] == y) {
                 kingMoved = true;
             } else if (entry[0] == rockX && entry[1] == y) {
@@ -342,14 +341,14 @@ public class Game implements Runnable{
         }
     }
 
-    private boolean isLongCastlingMove(int x) {
+    private boolean isLongCastlingMove(Integer x) {
         if (field[selection.x][selection.y] == 16 || field[selection.x][selection.y] == 26) {
             return selection.x - x == 2;
         }
         return false;
     }
 
-    private boolean isShortCastlingMove(int x) {
+    private boolean isShortCastlingMove(Integer x) {
         if (field[selection.x][selection.y] == 16 || field[selection.x][selection.y] == 26) {
             return selection.x - x == -2;
         }
@@ -357,7 +356,7 @@ public class Game implements Runnable{
     }
 
     private void validateLongCastling() {
-        int y = (currentColor.equals("WHITE")) ? 7 : 0;
+        Integer y = (currentColor.equals("WHITE")) ? 7 : 0;
         if (isCheck(currentColor, field)) {
             selection.possibleMoves = selection.possibleMoves.stream().filter(m -> !(m[0] == 2 && m[1] == y)).collect(Collectors.toList());
         }
@@ -386,7 +385,7 @@ public class Game implements Runnable{
         return mouseHandler;
     }
 
-    public void changePawnToQueen(int x, int y) {
+    public void changePawnToQueen(Integer x, Integer y) {
         int min, max;
         if (field[x][y] == 21 && y == 0) {
             min = 22;

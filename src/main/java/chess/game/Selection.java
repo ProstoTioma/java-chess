@@ -4,15 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Selection {
-    public int x;
-    public int y;
+    public Integer x;
+    public Integer y;
     public boolean selected;
-    public List<int[]> possibleMoves;
+    public List<Integer[]> possibleMoves;
     public boolean isDragAndDrop;
-    public int mouseX;
-    public int mouseY;
+    public Integer mouseX;
+    public Integer mouseY;
 
-    public Selection(int x, int y, boolean selected) {
+    public Selection(Integer x, Integer y, boolean selected) {
         this.x = x;
         this.y = y;
         this.selected = selected;
