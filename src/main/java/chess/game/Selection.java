@@ -11,6 +11,7 @@ public class Selection {
     public boolean isDragAndDrop;
     public Integer mouseX;
     public Integer mouseY;
+    public Integer[] pawnForPromotion;
 
     public Selection(Integer x, Integer y, boolean selected) {
         this.x = x;

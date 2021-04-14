@@ -25,8 +25,7 @@ public class Bot {
         var movesMap = new HashMap<Integer[], ArrayList<Integer[]>>();
         // Integer[]{x, y, xx, yy}, score
         var bestMovesMap = new HashMap<Integer[], Integer>();
-        game.getAllFiguresByColor(game.currentColor)
-                .stream().forEach(figure -> {
+        game.getAllFiguresByColor(game.currentColor).forEach(figure -> {
             var moves = game.getValidPossibleMoves(figure[0], figure[1], game.getPossibleMoves(figure[0], figure[1], game.field));
             if (moves.size() > 0) {
                 movesMap.put(figure, moves);
