@@ -23,10 +23,10 @@ public class Bot {
 
     public void makeBotMove() {
         var nextColor = (game.currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
-        var movesMap = new HashMap<Integer[], ArrayList<Integer[]>>();
+        var movesMap = new HashMap<Integer[], List<Integer[]>>();
         // Integer[]{x, y, xx, yy}, score
         var bestMovesMap = new HashMap<Integer[], Integer>();
-        game.getAllFiguresByColor(game.currentColor).forEach(figure -> {
+        game.getAllFiguresByColor(game.currentColor, game.field).forEach(figure -> {
             var moves = game.getValidPossibleMoves(figure[0], figure[1], game.getPossibleMoves(figure[0], figure[1], game.field));
             if (moves.size() > 0) {
                 movesMap.put(figure, moves);
@@ -42,11 +42,10 @@ public class Bot {
             for (Integer[] move : moves) {
                 Integer score = FigureUtils.figuresValue.get(game.field[move[0]][move[1]]);
                 Integer[][] copyField = Game.deepCopy(game.field);
-                copyField[move[0]][move[1]] = copyField[figure[0]][figure[1]];
-                copyField[figure[0]][figure[1]] = 10;
+                game.moveFigure(copyField, move[0], move[1], figure[0], figure[1]);
                 //get enemy moves
                 //var enemyMovesMap = new HashMap<Integer[], ArrayList<Integer[]>>();
-                var maxEnemyScore = game.getAllFiguresByColor(nextColor)
+                var maxEnemyScore = game.getAllFiguresByColor(nextColor, game.field)
                         .stream().map(enemyFigure -> {
                             var enemyMoves = game.getValidPossibleMoves(enemyFigure[0], enemyFigure[1], game.getPossibleMoves(enemyFigure[0], enemyFigure[1], copyField));
                             if (enemyMoves.size() > 0) {
@@ -60,9 +59,9 @@ public class Bot {
                         }).max(Integer::compareTo).get();
                 //TODO pawn to queen priority && castling && check && mate
                 //TODO don't move a king w/out reason
-                //NEW HERE:
-                if (score == 0 && (copyField[figure[0]][figure[1]] == 16 || copyField[figure[0]][figure[1]] == 26) && maxEnemyScore == 0)
-                    continue;
+//                //NEW HERE:
+//                if (score == 0 && (copyField[figure[0]][figure[1]] == 16 || copyField[figure[0]][figure[1]] == 26) && maxEnemyScore == 0)
+//                    continue;
                 if (game.isCheck(nextColor, copyField)) {
                     score = 1;
                 }
@@ -85,8 +84,7 @@ public class Bot {
         var bestMove = bestMoveList.get(bestMoveList.size() - 1).getKey();
 
 
-        game.field[bestMove[2]][bestMove[3]] = game.field[bestMove[0]][bestMove[1]];
-        game.field[bestMove[0]][bestMove[1]] = 10;
+        game.moveFigure(game.field, bestMove[2], bestMove[3], bestMove[0], bestMove[1]);
         game.changePawnToQueen(bestMove[2], bestMove[3]);
         game.history.add(bestMove);
         game.nextColor();

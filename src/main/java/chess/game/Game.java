@@ -24,8 +24,8 @@ public class Game implements Runnable{
     public Game() {
         initField();
 
-        //players.add(new Player("Player"));
-        //players.add(new Player("Player2"));
+//        players.add(new Player("Player"));
+//        players.add(new Player("Player2"));
         players.add(new BotPlayer("botPlayer", this));
         players.add(new BotPlayer("botPlayer2", this));
 
@@ -66,7 +66,7 @@ public class Game implements Runnable{
                 if (currentPlayer instanceof BotPlayer) {
                     ((BotPlayer) currentPlayer).makeMove();
                 }
-                Thread.sleep(500);
+                Thread.sleep(50);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -109,18 +109,22 @@ public class Game implements Runnable{
 
     }
 
-    private void moveSelectedFigure(Integer cellX, Integer cellY) {
-        field[cellX][cellY] = field[selection.x][selection.y];
+    public void moveFigure(Integer[][] chessField,Integer cellX, Integer cellY, Integer figureX, Integer figureY) {
+        chessField[cellX][cellY] = chessField[figureX][figureY];
         if (isLongCastlingMove(cellX)) {
-            field[cellX + 1][cellY] = field[0][cellY];
-            field[0][cellY] = 10;
+            chessField[cellX + 1][cellY] = chessField[0][cellY];
+            chessField[0][cellY] = 10;
         } else if (isShortCastlingMove(cellX)) {
-            field[cellX - 1][cellY] = field[7][cellY];
-            field[7][cellY] = 10;
+            chessField[cellX - 1][cellY] = chessField[7][cellY];
+            chessField[7][cellY] = 10;
         }
-        field[selection.x][selection.y] = 10;
+        chessField[figureX][figureY] = 10;
+    }
 
-        selection.pawnForPromotion = getPawnForPromotion(field);
+    private void moveSelectedFigure(Integer[][] chessField,Integer cellX, Integer cellY, Integer figureX, Integer figureY) {
+        moveFigure(chessField, cellX, cellY, figureX, figureY);
+
+        selection.pawnForPromotion = getPawnForPromotion(chessField);
 
         nextColor();
         //isCheck(currentColor, field);
@@ -151,9 +155,8 @@ public class Game implements Runnable{
         if (selection.isDragAndDrop) {
             try {
                 selection.possibleMoves.forEach((move) -> {
-                    if (move[0] == cellX && move[1] == cellY) {
-                        moveSelectedFigure(cellX, cellY);
-
+                    if (move[0].equals(cellX) && move[1].equals(cellY)) {
+                        moveSelectedFigure(field ,cellX, cellY, selection.x, selection.y);
                     }
                 });
 
@@ -164,11 +167,11 @@ public class Game implements Runnable{
             boolean actionMade = false;
             for (int i = 0; i < selection.possibleMoves.size(); i++) {
                 var v = selection.possibleMoves.get(i);
-                if (cellX == v[0] && cellY == v[1]) {
+                if (cellX.equals(v[0]) && cellY.equals(v[1])) {
                     var selected = field[selection.x][selection.y];
                     if (!isSameColor(cell, selected)) {
                         if (getFiguresColor(selected).equals(currentColor)) {
-                            moveSelectedFigure(cellX, cellY);
+                            moveSelectedFigure(field, cellX, cellY, selection.x, selection.y);
                             actionMade = true;
                         }
                     }
@@ -177,49 +180,43 @@ public class Game implements Runnable{
             selection.selected = false;
 
             if (!actionMade && field[cellX][cellY] != 10) {
-                selection.x = cellX;
-                selection.y = cellY;
-                if (currentColor.equals(getFiguresColor(field[selection.x][selection.y]))) {
-                    selection.possibleMoves = getValidPossibleMoves(selection.x, selection.y, getPossibleMoves(selection.x, selection.y, field));
-                    if ((cell == 16 || cell == 26) && canCastling(false)) {
-                        validateLongCastling();
-                    }
-                    if ((cell == 16 || cell == 26) && canCastling(true)) {
-                        validateShortCastling();
-                    }
-                } else {
-                    selection.possibleMoves = Collections.emptyList();
-                }
-                selection.selected = true;
+                selectFigure(cellX, cellY, cell);
                 selection.isDragAndDrop = true;
             }
-
 
         } else if (cell != 10) {
-            selection.x = cellX;
-            selection.y = cellY;
-            if (getFiguresColor(cell).equals(currentColor)) {
-                selection.possibleMoves = getValidPossibleMoves(selection.x, selection.y, getPossibleMoves(cellX, cellY, field));
-                if ((cell == 16 || cell == 26) && canCastling(false)) {
-                    validateLongCastling();
-                }
-                if ((cell == 16 || cell == 26) && canCastling(true)) {
-                    validateShortCastling();
-                }
-                selection.isDragAndDrop = true;
-            } else {
-                selection.possibleMoves = Collections.emptyList();
-            }
-            selection.selected = true;
+            selectFigure(cellX, cellY, cell);
         }
 
     }
 
-    public List<Integer[]> getAllFiguresByColor(String color) {
+    public void selectFigure(int cellX, int cellY, int cell) {
+        selection.x = cellX;
+        selection.y = cellY;
+        if (getFiguresColor(cell).equals(currentColor)) {
+            var possibleMoves = getValidPossibleMoves(selection.x, selection.y, getPossibleMoves(cellX, cellY, field));
+            selection.possibleMoves = possibleMoves;
+            if ((cell == 16 || cell == 26) && canCastling(false)) {
+                possibleMoves = validateLongCastling(possibleMoves);
+                selection.possibleMoves = possibleMoves;
+            }
+            if ((cell == 16 || cell == 26) && canCastling(true)) {
+                possibleMoves = validateShortCastling(possibleMoves);
+                selection.possibleMoves = possibleMoves;
+            }
+            selection.isDragAndDrop = true;
+        } else {
+            selection.possibleMoves = Collections.emptyList();
+            selection.isDragAndDrop = false;
+        }
+        selection.selected = true;
+    }
+
+    public List<Integer[]> getAllFiguresByColor(String color, Integer[][] chessField) {
         var figuresList = new ArrayList<Integer[]>();
         for (Integer i = 0; i < 8; i++) {
             for (Integer j = 0; j < 8; j++) {
-                var figure = field[j][i];
+                var figure = chessField[j][i];
                 if (getFiguresColor(figure).equals(color)) {
                     figuresList.add(new Integer[]{j, i});
                 }
@@ -257,7 +254,7 @@ public class Game implements Runnable{
         return possibleMoves;
     }
 
-    public ArrayList<Integer[]> getValidPossibleMoves(Integer x, Integer y, ArrayList<Integer[]> possibleMoves) {
+    public List<Integer[]> getValidPossibleMoves(Integer x, Integer y, ArrayList<Integer[]> possibleMoves) {
         ArrayList<Integer[]> validMoves = new ArrayList<>();
 
         possibleMoves.forEach((move) -> {
@@ -367,30 +364,32 @@ public class Game implements Runnable{
         return false;
     }
 
-    private void validateLongCastling() {
+    private List<Integer[]> validateLongCastling(List<Integer[]> possibleMoves) {
         Integer y = (currentColor.equals("WHITE")) ? 7 : 0;
         if (isCheck(currentColor, field)) {
-            selection.possibleMoves = selection.possibleMoves.stream().filter(m -> !(m[0] == 2 && m[1] == y)).collect(Collectors.toList());
+            possibleMoves = possibleMoves.stream().filter(m -> !(m[0] == 2 && m[1] == y)).collect(Collectors.toList());
         }
         var copy = deepCopy(field);
         copy[3][y] = copy[4][y];
         copy[4][y] = 10;
         if (isCheck(currentColor, copy)) {
-            selection.possibleMoves = selection.possibleMoves.stream().filter(m -> !(m[0] == 2 && m[1] == y)).collect(Collectors.toList());
+            possibleMoves = possibleMoves.stream().filter(m -> !(m[0] == 2 && m[1] == y)).collect(Collectors.toList());
         }
+        return possibleMoves;
     }
 
-    private void validateShortCastling() {
+    private List<Integer[]> validateShortCastling(List<Integer[]> possibleMoves) {
         int y = (currentColor.equals("WHITE")) ? 7 : 0;
         if (isCheck(currentColor, field)) {
-            selection.possibleMoves = selection.possibleMoves.stream().filter(m -> !(m[0] == 6 && m[1] == y)).collect(Collectors.toList());
+            possibleMoves = possibleMoves.stream().filter(m -> !(m[0] == 6 && m[1] == y)).collect(Collectors.toList());
         }
         var copy = deepCopy(field);
         copy[5][y] = copy[4][y];
         copy[4][y] = 10;
         if (isCheck(currentColor, copy)) {
-            selection.possibleMoves = selection.possibleMoves.stream().filter(m -> !(m[0] == 6 && m[1] == y)).collect(Collectors.toList());
+            possibleMoves = possibleMoves.stream().filter(m -> !(m[0] == 6 && m[1] == y)).collect(Collectors.toList());
         }
+        return possibleMoves;
     }
 
     public MouseHandler getMouseHandler() {
@@ -416,7 +415,7 @@ public class Game implements Runnable{
     public Integer[] getPawnForPromotion(Integer[][] chessField) {
         int pawnCode = (currentColor.equals("WHITE")) ? 21 : 11;
         int y = (currentColor.equals("WHITE")) ? 0 : 7;
-        for (Integer[] figure:  getAllFiguresByColor(currentColor)) {
+        for (Integer[] figure:  getAllFiguresByColor(currentColor, chessField)) {
             if(chessField[figure[0]][figure[1]] == pawnCode && figure[1] == y) {
                 return figure;
             }
@@ -447,17 +446,5 @@ public class Game implements Runnable{
         }
         return null;
     }
-
-
-    public void printFiled() {
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                System.out.printf(" %d ", field[j][i]);
-            }
-
-            System.out.println();
-        }
-    }
-
 
 }

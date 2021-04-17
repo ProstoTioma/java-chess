@@ -99,7 +99,7 @@ public class Screen extends Canvas {
 
     public void gameLoop() throws InterruptedException, IOException {
         while (true) {
-            Thread.sleep(20);
+            Thread.sleep(50);
             draw();
         }
     }
@@ -268,7 +268,6 @@ public class Screen extends Canvas {
         }
     }
 
-    //TODO
     private void drawFigureSelectionPopup(Graphics2D g) throws IOException {
         var pawn = game.selection.pawnForPromotion;
         if (pawn != null) {
