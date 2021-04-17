@@ -118,7 +118,7 @@ public class Screen extends Canvas {
         drawSideBar(g);
         drawDragAndDrop(g);
 
-        //drawFigureSelectionPopup(g);
+        drawFigureSelectionPopup(g);
 
         g.dispose();
         strategy.show();
@@ -270,12 +270,15 @@ public class Screen extends Canvas {
 
     //TODO
     private void drawFigureSelectionPopup(Graphics2D g) throws IOException {
-        g.setColor(Color.WHITE);
-        g.fillRoundRect((5 * 100) + 50, 50, 100, 400, 10, 10);
-        drawImage(g, "bn", (5 * 100) + 50, 50);
-        drawImage(g, "bb", (5 * 100) + 50, 150);
-        drawImage(g, "br", (5 * 100) + 50, 250);
-        drawImage(g, "bq", (5 * 100) + 50, 350);
+        var pawn = game.selection.pawnForPromotion;
+        if (pawn != null) {
+            g.setColor(Color.WHITE);
+            g.fillRoundRect((pawn[0] * 100) + 50, 50, 100, 350, 10, 10);
+            drawImage(g, "wq", (pawn[0] * 100) + 50, 50);
+            drawImage(g, "wn", (pawn[0] * 100) + 50, 150);
+            drawImage(g, "wr", (pawn[0] * 100) + 50, 250);
+            drawImage(g, "wb", (pawn[0] * 100) + 50, 350);
+        }
     }
 
 }

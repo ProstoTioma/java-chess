@@ -21,7 +21,7 @@ public class Game implements Runnable{
     public List<Player> players = new ArrayList<>();
 
 
-    public Game() throws InterruptedException {
+    public Game() {
         initField();
 
         //players.add(new Player("Player"));
@@ -118,6 +118,9 @@ public class Game implements Runnable{
             field[7][cellY] = 10;
         }
         field[selection.x][selection.y] = 10;
+
+        selection.pawnForPromotion = getPawnForPromotion(field);
+
         nextColor();
         //isCheck(currentColor, field);
         history.add(new Integer[]{selection.x, selection.y, cellX, cellY});
@@ -134,6 +137,15 @@ public class Game implements Runnable{
         Integer cellX = coords[0];
         Integer cellY = coords[1];
         var cell = field[cellX][cellY];
+
+        if (selection.pawnForPromotion != null) {
+            // check selected figure
+            var figure = getSelectedFigure(selection.pawnForPromotion, cellX, cellY);
+            field[selection.pawnForPromotion[0]][selection.pawnForPromotion[1]] = figure;
+            selection.pawnForPromotion = null;
+            return;
+        }
+
 
         if (selection.isDragAndDrop) {
             try {
@@ -199,7 +211,6 @@ public class Game implements Runnable{
             }
             selection.selected = true;
         }
-        changePawnToQueen(cellX, cellY);
 
     }
 
@@ -270,7 +281,7 @@ public class Game implements Runnable{
         }
     }
 
-    public boolean isCheck(String color, Integer[][] chessField) {
+    private boolean isCheck(String color, Integer[][] chessField) {
         Integer kingX = 0, kingY = 0;
         for (Integer i = 0; i < 8; i++) {
             for (Integer j = 0; j < 8; j++) {
@@ -400,6 +411,43 @@ public class Game implements Runnable{
             field[x][y] = randomFigure;
         }
     }
+
+    public Integer[] getPawnForPromotion(Integer[][] chessField) {
+        int pawnCode = (currentColor.equals("WHITE")) ? 21 : 11;
+        int y = (currentColor.equals("WHITE")) ? 0 : 7;
+        for (Integer[] figure:  getAllFiguresByColor(currentColor)) {
+            if(chessField[figure[0]][figure[1]] == pawnCode && figure[1] == y) {
+                return figure;
+            }
+        }
+        return null;
+    }
+
+    public Integer getSelectedFigure(Integer[] pawn, int x, int y) {
+        if (pawn[0] == x) {
+            switch (y) {
+                case 0:
+                    return 25;
+                case 1:
+                    return 23;
+                case 2:
+                    return 22;
+                case 3:
+                    return 24;
+                case 7:
+                    return 15;
+                case 6:
+                    return 13;
+                case 5:
+                    return 12;
+                case 4:
+                    return 14;
+            }
+        }
+        return null;
+    }
+
+
     public void printFiled() {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
