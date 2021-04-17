@@ -27,7 +27,7 @@ public class Bot {
         // Integer[]{x, y, xx, yy}, score
         var bestMovesMap = new HashMap<Integer[], Integer>();
         game.getAllFiguresByColor(game.currentColor, game.field).forEach(figure -> {
-            var moves = game.getValidPossibleMoves(figure[0], figure[1], game.getPossibleMoves(figure[0], figure[1], game.field));
+            var moves = game.getValidPossibleMoves(figure[0], figure[1], game.field);
             if (moves.size() > 0) {
                 movesMap.put(figure, moves);
             }
@@ -47,13 +47,12 @@ public class Bot {
                 //var enemyMovesMap = new HashMap<Integer[], ArrayList<Integer[]>>();
                 var maxEnemyScore = game.getAllFiguresByColor(nextColor, game.field)
                         .stream().map(enemyFigure -> {
-                            var enemyMoves = game.getValidPossibleMoves(enemyFigure[0], enemyFigure[1], game.getPossibleMoves(enemyFigure[0], enemyFigure[1], copyField));
+                            var enemyMoves = game.getValidPossibleMoves(enemyFigure[0], enemyFigure[1], copyField);
                             if (enemyMoves.size() > 0) {
                                 var max = enemyMoves.stream()
                                         .map(em -> FigureUtils.figuresValue.get(copyField[em[0]][em[1]]))
                                         .max(Integer::compareTo).get();
                                 return max;
-
                             }
                             return 0;
                         }).max(Integer::compareTo).get();
@@ -85,7 +84,7 @@ public class Bot {
 
 
         game.moveFigure(game.field, bestMove[2], bestMove[3], bestMove[0], bestMove[1]);
-        game.changePawnToQueen(bestMove[2], bestMove[3]);
+//        game.changePawnToQueen(bestMove[2], bestMove[3]);
         game.history.add(bestMove);
         game.nextColor();
     }
@@ -93,7 +92,7 @@ public class Bot {
     private void makeBotRandomMove(List<Integer[]> figures) {
         var randomFigureIndex = ThreadLocalRandom.current().nextInt(0, figures.size());
         var selectedFigure = figures.get(randomFigureIndex);
-        var moves = game.getValidPossibleMoves(selectedFigure[0], selectedFigure[1], game.getPossibleMoves(selectedFigure[0], selectedFigure[1], game.field));
+        var moves = game.getValidPossibleMoves(selectedFigure[0], selectedFigure[1], game.field);
         var randomMoveIndex = ThreadLocalRandom.current().nextInt(0, moves.size());
         var randomMove = moves.get(randomMoveIndex);
         game.selection.x = selectedFigure[0];

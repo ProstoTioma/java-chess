@@ -24,10 +24,10 @@ public class Game implements Runnable{
     public Game() {
         initField();
 
-//        players.add(new Player("Player"));
+        players.add(new Player("Player"));
 //        players.add(new Player("Player2"));
         players.add(new BotPlayer("botPlayer", this));
-        players.add(new BotPlayer("botPlayer2", this));
+//        players.add(new BotPlayer("botPlayer2", this));
 
 
         mouseHandler.addOnPressedListener((MouseEvent event) -> {
@@ -119,6 +119,14 @@ public class Game implements Runnable{
             chessField[7][cellY] = 10;
         }
         chessField[figureX][figureY] = 10;
+        var pawn = getPawnForPromotion(chessField);
+
+
+        //BOT ONLY
+        if (pawn != null && getCurrentPlayer().type.equals(PlayerType.BOT)) {
+            // check selected figure
+            changePawnToQueen(pawn[0], pawn[1]);
+        }
     }
 
     private void moveSelectedFigure(Integer[][] chessField,Integer cellX, Integer cellY, Integer figureX, Integer figureY) {
@@ -182,6 +190,8 @@ public class Game implements Runnable{
             if (!actionMade && field[cellX][cellY] != 10) {
                 selectFigure(cellX, cellY, cell);
                 selection.isDragAndDrop = true;
+            } else {
+                selection.isDragAndDrop = false;
             }
 
         } else if (cell != 10) {
@@ -194,7 +204,7 @@ public class Game implements Runnable{
         selection.x = cellX;
         selection.y = cellY;
         if (getFiguresColor(cell).equals(currentColor)) {
-            var possibleMoves = getValidPossibleMoves(selection.x, selection.y, getPossibleMoves(cellX, cellY, field));
+            var possibleMoves = getValidPossibleMoves(selection.x, selection.y, field);
             selection.possibleMoves = possibleMoves;
             if ((cell == 16 || cell == 26) && canCastling(false)) {
                 possibleMoves = validateLongCastling(possibleMoves);
@@ -254,11 +264,12 @@ public class Game implements Runnable{
         return possibleMoves;
     }
 
-    public List<Integer[]> getValidPossibleMoves(Integer x, Integer y, ArrayList<Integer[]> possibleMoves) {
+    public List<Integer[]> getValidPossibleMoves(Integer x, Integer y, Integer[][] chessField) {
+        var possibleMoves = getPossibleMoves(x, y, chessField);
         ArrayList<Integer[]> validMoves = new ArrayList<>();
 
         possibleMoves.forEach((move) -> {
-            Integer[][] copyField = deepCopy(field);
+            Integer[][] copyField = deepCopy(chessField);
             copyField[move[0]][move[1]] = copyField[x][y];
             copyField[x][y] = 10;
             //var nextColor = (currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
@@ -316,7 +327,7 @@ public class Game implements Runnable{
             for (Integer i = 0; i < 8; i++) {
                 for (Integer j = 0; j < 8; j++) {
                     if (currentColor.equals(getFiguresColor(field[j][i]))) {
-                        var moves = getValidPossibleMoves(j, i, getPossibleMoves(j, i, field));
+                        var moves = getValidPossibleMoves(j, i, field);
                         if (!moves.isEmpty()) {
                             mate = false;
                             break;
