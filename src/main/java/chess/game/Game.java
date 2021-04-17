@@ -24,9 +24,10 @@ public class Game implements Runnable{
     public Game() {
         initField();
 
-        //players.add(new Player("Player"));
-        players.add(new BotPlayer("botPlayer", this));
-        players.add(new BotPlayer("botPlayer2", this));
+        players.add(new Player("Player"));
+        players.add(new Player("Player2"));
+        //players.add(new BotPlayer("botPlayer", this));
+        //players.add(new BotPlayer("botPlayer2", this));
 
 
         mouseHandler.addOnPressedListener((MouseEvent event) -> {
@@ -65,7 +66,7 @@ public class Game implements Runnable{
                 if (currentPlayer instanceof BotPlayer) {
                     ((BotPlayer) currentPlayer).makeMove();
                 }
-                Thread.sleep(50);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

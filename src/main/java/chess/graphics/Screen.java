@@ -272,12 +272,21 @@ public class Screen extends Canvas {
     private void drawFigureSelectionPopup(Graphics2D g) throws IOException {
         var pawn = game.selection.pawnForPromotion;
         if (pawn != null) {
-            g.setColor(Color.WHITE);
-            g.fillRoundRect((pawn[0] * 100) + 50, 50, 100, 350, 10, 10);
-            drawImage(g, "wq", (pawn[0] * 100) + 50, 50);
-            drawImage(g, "wn", (pawn[0] * 100) + 50, 150);
-            drawImage(g, "wr", (pawn[0] * 100) + 50, 250);
-            drawImage(g, "wb", (pawn[0] * 100) + 50, 350);
+            if(pawn[1] == 0) {
+                g.setColor(Color.WHITE);
+                g.fillRoundRect((pawn[0] * 100) + 50, 50, 100, 400, 10, 10);
+                drawImage(g, "wq", (pawn[0] * 100) + 50, 50);
+                drawImage(g, "wn", (pawn[0] * 100) + 50, 150);
+                drawImage(g, "wr", (pawn[0] * 100) + 50, 250);
+                drawImage(g, "wb", (pawn[0] * 100) + 50, 350);
+            } else if(pawn[1] == 7) {
+                g.setColor(Color.WHITE);
+                g.fillRoundRect((pawn[0] * 100) + 50, 450, 100, 400, 10, 10);
+                drawImage(g, "bb", (pawn[0] * 100) + 50, 450);
+                drawImage(g, "br", (pawn[0] * 100) + 50, 550);
+                drawImage(g, "bn", (pawn[0] * 100) + 50, 650);
+                drawImage(g, "bq", (pawn[0] * 100) + 50, 750);
+            }
         }
     }
 
