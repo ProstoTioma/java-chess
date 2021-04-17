@@ -24,10 +24,10 @@ public class Game implements Runnable{
     public Game() {
         initField();
 
-        players.add(new Player("Player"));
-        players.add(new Player("Player2"));
-        //players.add(new BotPlayer("botPlayer", this));
-        //players.add(new BotPlayer("botPlayer2", this));
+        //players.add(new Player("Player"));
+        //players.add(new Player("Player2"));
+        players.add(new BotPlayer("botPlayer", this));
+        players.add(new BotPlayer("botPlayer2", this));
 
 
         mouseHandler.addOnPressedListener((MouseEvent event) -> {
@@ -400,16 +400,16 @@ public class Game implements Runnable{
     public void changePawnToQueen(Integer x, Integer y) {
         int min, max;
         if (field[x][y] == 21 && y == 0) {
-            min = 22;
+           /* min = 22;
             max = 25;
-            int randomFigure = (int) Math.floor(Math.random() * (max - min + 1) + min);
-            field[x][y] = randomFigure;
+            int randomFigure = (int) Math.floor(Math.random() * (max - min + 1) + min);*/
+            field[x][y] = 25;
 
         } else if (field[x][y] == 11 && y == 7) {
-            min = 12;
+            /*min = 12;
             max = 15;
-            int randomFigure = (int) Math.floor(Math.random() * (max - min + 1) + min);
-            field[x][y] = randomFigure;
+            int randomFigure = (int) Math.floor(Math.random() * (max - min + 1) + min);*/
+            field[x][y] = 15;
         }
     }
 
