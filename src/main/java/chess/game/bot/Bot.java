@@ -55,12 +55,21 @@ public class Bot {
                             }
                             return 0;
                         }).max(Integer::compareTo).get();
+                //TODO pawn to queen priority && castling && check && mate
+                //TODO don't move a king w/out reason
+                //NEW HERE:
+                if(score == 0 && (copyField[figure[0]][figure[1]] == 16 || copyField[figure[0]][figure[1]] == 26) && maxEnemyScore == 0) continue;
+                if(game.isCheck(nextColor, copyField)) {
+                    score = 2;
+                }
+                if(game.isMate(nextColor, copyField)) {
+                    score = 100;
+                }
                 var totalScoreOfMove = score - maxEnemyScore;
                 if (totalScoreOfMove >= bestMoveScore) {
                     bestMove = move;
                     bestMoveScore = totalScoreOfMove;
                 }
-                //todo make move and check score
             }
             if (bestMove != null)
                 bestMovesMap.put(new Integer[]{figure[0], figure[1], bestMove[0], bestMove[1]}, bestMoveScore);
@@ -71,8 +80,10 @@ public class Bot {
 
         var bestMove = bestMoveList.get(bestMoveList.size() - 1).getKey();
 
+
         game.field[bestMove[2]][bestMove[3]] = game.field[bestMove[0]][bestMove[1]];
         game.field[bestMove[0]][bestMove[1]] = 10;
+        game.changePawnToQueen(bestMove[2], bestMove[3]);
         game.history.add(bestMove);
         game.nextColor();
     }

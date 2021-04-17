@@ -24,8 +24,8 @@ public class Game implements Runnable{
     public Game() throws InterruptedException {
         initField();
 
-        players.add(new BotPlayer("botPlayer", this));
         //players.add(new Player("Player"));
+        players.add(new BotPlayer("botPlayer", this));
         players.add(new BotPlayer("botPlayer2", this));
 
 
@@ -65,7 +65,7 @@ public class Game implements Runnable{
                 if (currentPlayer instanceof BotPlayer) {
                     ((BotPlayer) currentPlayer).makeMove();
                 }
-                Thread.sleep(500);
+                Thread.sleep(350);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -124,7 +124,7 @@ public class Game implements Runnable{
         System.out.printf("Figure from %s%s to %s%s\n", nameOfLettersX.get(selection.x), nameOfLettersY.get(selection.y), nameOfLettersX.get(cellX), nameOfLettersY.get(cellY));
         selection.selected = false;
         var nextColor = (currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
-        if (isMate()) System.out.println("Mate! Winner: " + nextColor);
+        if (isMate(currentColor, field)) System.out.println("Mate! Winner: " + nextColor);
 
     }
 
@@ -270,7 +270,7 @@ public class Game implements Runnable{
         }
     }
 
-    private boolean isCheck(String color, Integer[][] chessField) {
+    public boolean isCheck(String color, Integer[][] chessField) {
         Integer kingX = 0, kingY = 0;
         for (Integer i = 0; i < 8; i++) {
             for (Integer j = 0; j < 8; j++) {
@@ -301,9 +301,9 @@ public class Game implements Runnable{
         return check;
     }
 
-    private boolean isMate() {
+    public boolean isMate(String color, Integer[][] field) {
         boolean mate = true;
-        if (isCheck(currentColor, field)) {
+        if (isCheck(color, field)) {
             for (Integer i = 0; i < 8; i++) {
                 for (Integer j = 0; j < 8; j++) {
                     if (currentColor.equals(getFiguresColor(field[j][i]))) {

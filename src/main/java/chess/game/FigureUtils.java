@@ -21,13 +21,13 @@ public class FigureUtils {
         figuresValue.put(13, 3);
         figuresValue.put(14, 3);
         figuresValue.put(15, 9);
-        figuresValue.put(16, 3);
+        figuresValue.put(16, 10);
         figuresValue.put(21, 1);
         figuresValue.put(22, 5);
         figuresValue.put(23, 3);
         figuresValue.put(24, 3);
         figuresValue.put(25, 9);
-        figuresValue.put(26, 3);
+        figuresValue.put(26, 10);
 
         figuresMap.put(11, "bp");
         figuresMap.put(12, "br");
