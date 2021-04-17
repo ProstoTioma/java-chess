@@ -22,6 +22,7 @@ public class Bot {
     }
 
     public void makeBotMove() {
+        var nextColor = (game.currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
         var movesMap = new HashMap<Integer[], ArrayList<Integer[]>>();
         // Integer[]{x, y, xx, yy}, score
         var bestMovesMap = new HashMap<Integer[], Integer>();
@@ -31,6 +32,10 @@ public class Bot {
                 movesMap.put(figure, moves);
             }
         });
+        if (game.isMate(game.currentColor, game.field)) {
+            System.out.println("Mate! Winner: " + nextColor);
+            return;
+        }
         movesMap.forEach((figure, moves) -> {
             Integer[] bestMove = moves.get(0);
             var bestMoveScore = -10;
@@ -39,7 +44,6 @@ public class Bot {
                 Integer[][] copyField = Game.deepCopy(game.field);
                 copyField[move[0]][move[1]] = copyField[figure[0]][figure[1]];
                 copyField[figure[0]][figure[1]] = 10;
-                var nextColor = (game.currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
                 //get enemy moves
                 //var enemyMovesMap = new HashMap<Integer[], ArrayList<Integer[]>>();
                 var maxEnemyScore = game.getAllFiguresByColor(nextColor)
@@ -57,11 +61,12 @@ public class Bot {
                 //TODO pawn to queen priority && castling && check && mate
                 //TODO don't move a king w/out reason
                 //NEW HERE:
-                if(score == 0 && (copyField[figure[0]][figure[1]] == 16 || copyField[figure[0]][figure[1]] == 26) && maxEnemyScore == 0) continue;
-                if(game.isCheck(nextColor, copyField)) {
-                    score = 2;
+                if (score == 0 && (copyField[figure[0]][figure[1]] == 16 || copyField[figure[0]][figure[1]] == 26) && maxEnemyScore == 0)
+                    continue;
+                if (game.isCheck(nextColor, copyField)) {
+                    score = 1;
                 }
-                if(game.isMate(nextColor, copyField)) {
+                if (game.isMate(nextColor, copyField)) {
                     score = 100;
                 }
                 var totalScoreOfMove = score - maxEnemyScore;

@@ -65,7 +65,7 @@ public class Game implements Runnable{
                 if (currentPlayer instanceof BotPlayer) {
                     ((BotPlayer) currentPlayer).makeMove();
                 }
-                Thread.sleep(350);
+                Thread.sleep(50);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -281,7 +281,7 @@ public class Game implements Runnable{
         }
     }
 
-    private boolean isCheck(String color, Integer[][] chessField) {
+    public boolean isCheck(String color, Integer[][] chessField) {
         Integer kingX = 0, kingY = 0;
         for (Integer i = 0; i < 8; i++) {
             for (Integer j = 0; j < 8; j++) {
