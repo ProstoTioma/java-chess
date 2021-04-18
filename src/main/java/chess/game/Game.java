@@ -56,20 +56,8 @@ public class Game implements Runnable{
             try {
                 var currentPlayer = getCurrentPlayer();
                 if (currentPlayer instanceof BotPlayer) {
-                    if (!board.isDraw() && !board.isStaleMate() && !board.isMate())
+                    if (!isGameOver) {
                         ((BotPlayer) currentPlayer).makeMove();
-                    else if (board.isDraw()) {
-                        System.out.println("Draw! " + board.history.size() / 2);
-                        isGameOver = true;
-                        return;
-                    } else if (board.isStaleMate()) {
-                        System.out.println("Stale Mate! " + board.history.size() / 2);
-                        isGameOver = true;
-                        return;
-                    } else {
-                        var nextColor = (board.currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
-                        System.out.printf("Mate! Winner: %s. %d moves", nextColor, board.history.size() / 2);
-                        return;
                     }
                 }
 
@@ -90,7 +78,7 @@ public class Game implements Runnable{
                     System.out.printf("Mate! Winner: %s. %d moves", nextColor, board.history.size() / 2);
                     return;
                 }
-                Thread.sleep(50);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

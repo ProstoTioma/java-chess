@@ -9,8 +9,7 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
-import static chess.game.chess.FigureUtils.nameOfLettersX;
-import static chess.game.chess.FigureUtils.nameOfLettersY;
+import static chess.game.chess.FigureUtils.*;
 
 public class Bot {
 
@@ -41,6 +40,13 @@ public class Bot {
             var bestMoveScore = -10;
             for (Integer[] move : moves) {
                 Integer score = FigureUtils.figuresValue.get(game.board.getCell(move[0], move[1]));
+
+                if (isPawn(game.board.getCell(figure[0], figure[1])) && onOpositeSide(nextColor, move[1])) {
+                    score += 1;
+                    if (move[1] == 7 || move[1] == 0) {
+                        score += 9;
+                    }
+                }
                 var copyBoard = game.board.copy();
                 copyBoard.moveFigure(move[0], move[1], figure[0], figure[1], getPromotionCode(nextColor));
                 //get enemy moves
@@ -81,6 +87,10 @@ public class Bot {
         var randomBestMoveIndex =  ThreadLocalRandom.current().nextInt(0, bestMoveList.size());
         var bestMove = bestMoveList.get(randomBestMoveIndex).getKey();
         game.board.moveFigure(bestMove[2], bestMove[3], bestMove[0], bestMove[1], getPromotionCode(nextColor));
+    }
+
+    private boolean onOpositeSide(String color, Integer y) {
+        return color.equals("WHITE") ?  (y > 5) : (y < 3);
     }
 
     //always promote to queen
