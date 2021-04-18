@@ -76,8 +76,10 @@ public class Bot {
 
         var bestMoveList = bestMovesMap.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue()).collect(Collectors.toList());
-        var bestMove = bestMoveList.get(bestMoveList.size() - 1).getKey();
-
+        var minvalue = bestMoveList.get(bestMoveList.size() - 1).getValue();
+        bestMoveList = bestMoveList.stream().filter(bm -> bm.getValue().equals(minvalue)).collect(Collectors.toList());
+        var randomBestMoveIndex =  ThreadLocalRandom.current().nextInt(0, bestMoveList.size());
+        var bestMove = bestMoveList.get(randomBestMoveIndex).getKey();
         game.board.moveFigure(bestMove[2], bestMove[3], bestMove[0], bestMove[1], getPromotionCode(nextColor));
     }
 
