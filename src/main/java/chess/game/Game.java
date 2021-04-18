@@ -28,7 +28,7 @@ public class Game implements Runnable {
         initField();
         players.add(new Player("Player"));
         /*players.add(new Player("Player2"));*/
-        /*players.add(new BotPlayer("botPlayer", this));*/
+//        players.add(new BotPlayer("botPlayer", this));
         players.add(new BotPlayer("botPlayer2", this));
 
 
@@ -77,30 +77,30 @@ public class Game implements Runnable {
                     if (!isDraw() && !isStaleMate(field, currentColor) && !isMate(currentColor, field))
                         ((BotPlayer) currentPlayer).makeMove();
                     else if (isDraw()) {
-                        System.out.println("Draw! " + history.size() / 2 + 1);
+                        System.out.println("Draw! " + history.size() / 2);
                         return;
                     } else if (isStaleMate(field, currentColor)) {
-                        System.out.println("Stale Mate! " + history.size() / 2 + 1);
+                        System.out.println("Stale Mate! " + history.size() / 2);
                         return;
                     } else {
                         var nextColor = (currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
-                        System.out.printf("Mate! Winner: %s. %d moves", nextColor, history.size() / 2 + 2);
+                        System.out.printf("Mate! Winner: %s. %d moves", nextColor, history.size() / 2);
                         return;
                     }
                 }
 
                 if (isDraw()) {
-                    System.out.println("Draw! " + history.size() / 2 + 1);
+                    System.out.println("Draw! " + history.size() / 2);
                     return;
                 }
                 if (isStaleMate(field, currentColor)) {
-                    System.out.println("Stale Mate! " + history.size() / 2 + 1);
+                    System.out.println("Stale Mate! " + history.size() / 2);
                     return;
                 }
 
                 if (isMate(currentColor, field)) {
                     var nextColor = (currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
-                    System.out.printf("Mate! Winner: %s. %d moves", nextColor, history.size() / 2 + 1);
+                    System.out.printf("Mate! Winner: %s. %d moves", nextColor, history.size() / 2);
                     return;
                 }
                 Thread.sleep(100);
