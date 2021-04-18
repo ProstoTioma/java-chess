@@ -4,7 +4,6 @@ import chess.game.Game;
 import chess.game.bot.Bot;
 
 public class BotPlayer extends Player {
-
     Bot bot;
 
     public BotPlayer(String name, Game g) {
@@ -13,7 +12,7 @@ public class BotPlayer extends Player {
         bot = new Bot(g);
     }
 
-    public void makeMove() throws InterruptedException {
+    public void makeMove() {
         bot.makeBotMove();
     }
 }

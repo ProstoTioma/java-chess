@@ -16,7 +16,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import static chess.game.FigureUtils.figuresMap;
+import static chess.game.chess.FigureUtils.figuresMap;
 
 public class Screen extends Canvas {
 
@@ -40,7 +40,7 @@ public class Screen extends Canvas {
     }
 
 
-    public Screen(Integer width, Integer height) throws InterruptedException {
+    public Screen(Integer width, Integer height) {
         this.width = width;
         this.height = height;
         JFrame container = new JFrame("Chess");
@@ -104,7 +104,7 @@ public class Screen extends Canvas {
         }
     }
 
-    private void draw() throws IOException {
+    private void draw() {
         var g = getGameGraphics();
 
         drawBackground(g);
@@ -129,8 +129,8 @@ public class Screen extends Canvas {
     }
 
     private void drawLetters(Graphics2D g) {
-        Integer x = 20, y = 100;
-        for (Integer i = 8; i > 0; i--) {
+        int x = 20, y = 100;
+        for (int i = 8; i > 0; i--) {
             g.setColor(new Color(152, 151, 139));
             g.setFont(new Font("O", Font.BOLD, 20));
             g.drawString("" + i, x, y);
@@ -138,10 +138,10 @@ public class Screen extends Canvas {
         }
         y = height - 20;
         x = 90;
-        for (Integer i = 97; i < 105; i++) {
+        for (int i = 97; i < 105; i++) {
             g.setColor(new Color(152, 151, 139));
             g.setFont(new Font("O", Font.BOLD, 20));
-            g.drawString("" + (char) i.intValue(), x, y);
+            g.drawString("" + (char) i, x, y);
             x += 100;
         }
     }
@@ -152,10 +152,10 @@ public class Screen extends Canvas {
     }
 
     private void drawChessBoard(Graphics2D g) {
-        Integer x = 50, y = 50;
-        final Integer cellWidth = 100, cellHeight = 100;
-        for (Integer i = 0; i < 8; i++) {
-            for (Integer j = 0; j < 4; j++) {
+        int x = 50, y = 50;
+        final int cellWidth = 100, cellHeight = 100;
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 4; j++) {
                 var startColor = (i % 2 == 0) ? Color.WHITE : new Color(136, 119, 183);
                 var nexColor = (startColor.equals(Color.WHITE)) ? new Color(136, 119, 183) : Color.WHITE;
                 g.setColor(startColor);
@@ -169,11 +169,11 @@ public class Screen extends Canvas {
         }
     }
 
-    private void drawChessField(Graphics2D g) throws IOException {
-        Integer x = 50, y = 50;
-        for (Integer i = 0; i < 8; i++) {
-            for (Integer j = 0; j < 8; j++) {
-                String image = figuresMap.get(game.field[j][i]);
+    private void drawChessField(Graphics2D g) {
+        int x = 50, y = 50;
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                String image = figuresMap.get(game.board.getCell(j, i));
                 if (image != null) {
                     if (!(game.selection.isDragAndDrop && j == game.selection.x && i == game.selection.y)) {
                         drawImage(g, image, x, y);
@@ -186,7 +186,7 @@ public class Screen extends Canvas {
         }
     }
 
-    private void drawImage(Graphics2D g, String figureName, Integer x, Integer y) throws IOException {
+    private void drawImage(Graphics2D g, String figureName, Integer x, Integer y) {
         var bi = imageMap.get(figureName);
         g.drawImage(bi, null, x, y);
     }
@@ -208,7 +208,7 @@ public class Screen extends Canvas {
             var moves = game.selection.possibleMoves;
             moves.forEach(move -> {
                 g.setColor(new Color(20, 20, 20, 50));
-                if (game.field[move[0]][move[1]] == 10) {
+                if (game.board.getCell(move[0], move[1]) == 10) {
                     g.fillOval((move[0] * 100) + 80, (move[1] * 100) + 80, 35, 35);
                 } else {
                     var ring = createRingShape((move[0] * 100) + 100, (move[1] * 100) + 100, 50, 9);
@@ -225,9 +225,9 @@ public class Screen extends Canvas {
     }
 
 
-    private void drawDragAndDrop(Graphics2D g) throws IOException {
+    private void drawDragAndDrop(Graphics2D g) {
         if (game.selection.isDragAndDrop) {
-            var image = figuresMap.get(game.field[game.selection.x][game.selection.y]);
+            var image = figuresMap.get(game.board.getCell(game.selection.x, game.selection.y));
             if (image != null) drawImage(g, image, game.selection.mouseX - 50, game.selection.mouseY - 50);
         }
     }
@@ -260,15 +260,15 @@ public class Screen extends Canvas {
     }
 
     private void highlightLastMove(Graphics2D g) {
-        if (!game.history.isEmpty()) {
-            var lastMove = game.history.get(game.history.size() - 1);
+        if (!game.board.history.isEmpty()) {
+            var lastMove = game.board.history.get(game.board.history.size() - 1);
             highlightCell(g, lastMove[0], lastMove[1]);
             highlightCell(g, lastMove[2], lastMove[3]);
 
         }
     }
 
-    private void drawFigureSelectionPopup(Graphics2D g) throws IOException {
+    private void drawFigureSelectionPopup(Graphics2D g) {
         var pawn = game.selection.pawnForPromotion;
         if (pawn != null) {
             if(pawn[1] == 0) {

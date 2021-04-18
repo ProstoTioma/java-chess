@@ -1,6 +1,6 @@
 package chess.game.bot;
 
-import chess.game.FigureUtils;
+import chess.game.chess.FigureUtils;
 import chess.game.Game;
 
 import java.util.HashMap;
@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
-import static chess.game.FigureUtils.nameOfLettersX;
-import static chess.game.FigureUtils.nameOfLettersY;
+import static chess.game.chess.FigureUtils.nameOfLettersX;
+import static chess.game.chess.FigureUtils.nameOfLettersY;
 
 public class Bot {
 
@@ -20,18 +20,19 @@ public class Bot {
         this.game = game;
     }
 
+
     public void makeBotMove() {
-        var nextColor = (game.currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
+        var nextColor = (game.board.currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
         var movesMap = new HashMap<Integer[], List<Integer[]>>();
         // Integer[]{x, y, xx, yy}, score
         var bestMovesMap = new HashMap<Integer[], Integer>();
-        game.getAllFiguresByColor(game.currentColor, game.field).forEach(figure -> {
-            var moves = game.getValidPossibleMoves(figure[0], figure[1], game.field);
+        game.board.getAllFiguresByColor(game.board.currentColor).forEach(figure -> {
+            var moves = game.board.getValidPossibleMoves(figure[0], figure[1]);
             if (moves.size() > 0) {
                 movesMap.put(figure, moves);
             }
         });
-        if (game.isMate(game.currentColor, game.field)) {
+        if (game.board.isMate()) {
             System.out.println("Mate! Winner: " + nextColor);
             return;
         }
@@ -39,17 +40,16 @@ public class Bot {
             Integer[] bestMove = moves.get(0);
             var bestMoveScore = -10;
             for (Integer[] move : moves) {
-                Integer score = FigureUtils.figuresValue.get(game.field[move[0]][move[1]]);
-                Integer[][] copyField = Game.deepCopy(game.field);
-                game.moveFigure(copyField, move[0], move[1], figure[0], figure[1]);
+                Integer score = FigureUtils.figuresValue.get(game.board.getCell(move[0], move[1]));
+                var copyBoard = game.board.copy();
+                copyBoard.moveFigure(move[0], move[1], figure[0], figure[1], getPromotionCode(nextColor));
                 //get enemy moves
-                //var enemyMovesMap = new HashMap<Integer[], ArrayList<Integer[]>>();
-                var maxEnemyScore = game.getAllFiguresByColor(nextColor, game.field)
+                var maxEnemyScore = game.board.getAllFiguresByColor(nextColor)
                         .stream().map(enemyFigure -> {
-                            var enemyMoves = game.getValidPossibleMoves(enemyFigure[0], enemyFigure[1], copyField);
+                            var enemyMoves = copyBoard.getValidPossibleMoves(enemyFigure[0], enemyFigure[1]);
                             if (enemyMoves.size() > 0) {
                                 var max = enemyMoves.stream()
-                                        .map(em -> FigureUtils.figuresValue.get(copyField[em[0]][em[1]]))
+                                        .map(em -> FigureUtils.figuresValue.get(copyBoard.getCell(em[0], em[1])))
                                         .max(Integer::compareTo).get();
                                 return max;
                             }
@@ -57,13 +57,11 @@ public class Bot {
                         }).max(Integer::compareTo).get();
                 //TODO pawn to queen priority && castling && check && mate
                 //TODO don't move a king w/out reason
-//                //NEW HERE:
-//                if (score == 0 && (copyField[figure[0]][figure[1]] == 16 || copyField[figure[0]][figure[1]] == 26) && maxEnemyScore == 0)
-//                    continue;
-                if (game.isCheck(nextColor, copyField)) {
+
+                if (copyBoard.isCheck(nextColor, copyBoard.field)) {
                     score = 1;
                 }
-                if (game.isMate(nextColor, copyField)) {
+                if (copyBoard.isMate()) {
                     score = 100;
                 }
                 var totalScoreOfMove = score - maxEnemyScore;
@@ -78,28 +76,32 @@ public class Bot {
 
         var bestMoveList = bestMovesMap.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue()).collect(Collectors.toList());
-
         var bestMove = bestMoveList.get(bestMoveList.size() - 1).getKey();
 
-
-        game.moveFigure(game.field, bestMove[2], bestMove[3], bestMove[0], bestMove[1]);
-//        game.changePawnToQueen(bestMove[2], bestMove[3]);
-        game.history.add(bestMove);
-        game.nextColor();
+        game.board.moveFigure(bestMove[2], bestMove[3], bestMove[0], bestMove[1], getPromotionCode(nextColor));
     }
 
-    private void makeBotRandomMove(List<Integer[]> figures) {
-        var randomFigureIndex = ThreadLocalRandom.current().nextInt(0, figures.size());
-        var selectedFigure = figures.get(randomFigureIndex);
-        var moves = game.getValidPossibleMoves(selectedFigure[0], selectedFigure[1], game.field);
-        var randomMoveIndex = ThreadLocalRandom.current().nextInt(0, moves.size());
-        var randomMove = moves.get(randomMoveIndex);
-        game.selection.x = selectedFigure[0];
-        game.selection.y = selectedFigure[1];
-        System.out.printf("Figure from %s%s to %s%s\n", nameOfLettersX.get(game.selection.x), nameOfLettersY.get(game.selection.y), nameOfLettersX.get(randomMove[0]), nameOfLettersY.get(randomMove[1]));
-        game.field[randomMove[0]][randomMove[1]] = game.field[selectedFigure[0]][selectedFigure[1]];
-        game.field[selectedFigure[0]][selectedFigure[1]] = 10;
-        game.history.add(new Integer[]{randomMove[0], randomMove[1], selectedFigure[0], selectedFigure[1]});
+    //always promote to queen
+    private Integer getPromotionCode(String color) {
+        return color.equals("WHITE") ? 25 : 15;
     }
 
+    public void makeBotRandomMove() {
+        var figures = game.board.getAllFiguresByColor(game.board.currentColor).stream().filter(f -> game.board.getValidPossibleMoves(f[0], f[1]).size() > 0).collect(Collectors.toList());
+        if (figures.size() > 0) {
+            var randomFigureIndex = ThreadLocalRandom.current().nextInt(0, figures.size());
+            var selectedFigure = figures.get(randomFigureIndex);
+            var moves = game.board.getValidPossibleMoves(selectedFigure[0], selectedFigure[1]);
+            var randomMoveIndex = ThreadLocalRandom.current().nextInt(0, moves.size());
+            var randomMove = moves.get(randomMoveIndex);
+            game.selection.x = selectedFigure[0];
+            game.selection.y = selectedFigure[1];
+            System.out.printf("Figure from %s%s to %s%s\n", nameOfLettersX.get(game.selection.x), nameOfLettersY.get(game.selection.y), nameOfLettersX.get(randomMove[0]), nameOfLettersY.get(randomMove[1]));
+
+            game.board.moveFigure(randomMove[0], randomMove[1], selectedFigure[0], selectedFigure[1], getPromotionCode(game.board.currentColor));
+        } else {
+            System.out.println("no moves found");
+        }
+
+    }
 }

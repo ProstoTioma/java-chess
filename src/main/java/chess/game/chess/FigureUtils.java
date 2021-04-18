@@ -1,10 +1,8 @@
-package chess.game;
+package chess.game.chess;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import static chess.game.Game.getFiguresColor;
 
 public class FigureUtils {
 
@@ -286,6 +284,12 @@ public class FigureUtils {
         }
 
         return possibleMoves;
+    }
+
+    public static String getFiguresColor(Integer code) {
+        if(code < 17 && code > 10) return "BLACK";
+        else if(code > 17) return "WHITE";
+        else return "VOID";
     }
 
 }
