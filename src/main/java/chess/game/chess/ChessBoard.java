@@ -295,6 +295,29 @@ public class ChessBoard {
         return res;
     }
 
+    public boolean isDraw() {
+        if (history.size() > 9) {
+            var moveL = history.get(history.size() - 1);
+            var moveP = history.get(history.size() - 2);
+            if (Arrays.equals(moveL, history.get(history.size() - 5)) && Arrays.equals(moveL, history.get(history.size() - 9))
+                    && Arrays.equals(moveP, history.get(history.size() - 6)) && Arrays.equals(moveP, history.get(history.size() - 10))) {
+                return true;
+            }
+        }
+        var bFigures = getAllFiguresByColor("BLACK");
+        var wFigures = getAllFiguresByColor("WHITE");
+        return bFigures.size() == 1 && wFigures.size() == 1;
+    }
+
+    public boolean isStaleMate() {
+        if (!isMate()) {
+            var figures = getAllFiguresByColor(currentColor);
+            int count = (int) figures.stream().filter(move -> getValidPossibleMoves(move[0], move[1]).size() != 0).count();
+            return count == 0;
+        }
+        return false;
+    }
+
     public void promotePawnWithSelectedFigure(Integer figureCode, Integer pawnX, Integer pawnY) {
         field[pawnX][pawnY] = figureCode;
         nextColor();

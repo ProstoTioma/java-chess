@@ -19,6 +19,7 @@ public class Game implements Runnable{
     private final MouseHandler mouseHandler = new MouseHandler();
     public List<Player> players = new ArrayList<>();
     public ChessBoard board;
+    boolean isGameOver = false;
 
 
     public Game() {
@@ -27,8 +28,8 @@ public class Game implements Runnable{
 
         players.add(new Player("Player"));
         players.add(new Player("Player2"));
-        //players.add(new BotPlayer2("botPlayer", this));
-        //players.add(new BotPlayer2("botPlayer2", this));
+//        players.add(new BotPlayer("botPlayer", this));
+//        players.add(new BotPlayer("botPlayer2", this));
 
 
         mouseHandler.addOnPressedListener((MouseEvent event) -> {
@@ -55,9 +56,41 @@ public class Game implements Runnable{
             try {
                 var currentPlayer = getCurrentPlayer();
                 if (currentPlayer instanceof BotPlayer) {
-                    ((BotPlayer) currentPlayer).makeMove();
+                    if (!board.isDraw() && !board.isStaleMate() && !board.isMate())
+                        ((BotPlayer) currentPlayer).makeMove();
+                    else if (board.isDraw()) {
+                        System.out.println("Draw! " + board.history.size() / 2);
+                        isGameOver = true;
+                        return;
+                    } else if (board.isStaleMate()) {
+                        System.out.println("Stale Mate! " + board.history.size() / 2);
+                        isGameOver = true;
+                        return;
+                    } else {
+                        var nextColor = (board.currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
+                        System.out.printf("Mate! Winner: %s. %d moves", nextColor, board.history.size() / 2);
+                        return;
+                    }
                 }
-                Thread.sleep(500);
+
+                if (board.isDraw()) {
+                    isGameOver = true;
+                    System.out.println("Draw! " + board.history.size() / 2);
+                    return;
+                }
+                if (board.isStaleMate()) {
+                    isGameOver = true;
+                    System.out.println("Stale Mate! " + board.history.size() / 2);
+                    return;
+                }
+
+                if (board.isMate()) {
+                    isGameOver = true;
+                    var nextColor = (board.currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
+                    System.out.printf("Mate! Winner: %s. %d moves", nextColor, board.history.size() / 2);
+                    return;
+                }
+                Thread.sleep(50);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -87,53 +120,56 @@ public class Game implements Runnable{
         Integer cellY = coords[1];
         var cell = board.getCell(cellX, cellY);
 
-        if (selection.pawnForPromotion != null) {
-            // check selected figure
-            var figure = getSelectedFigure(selection.pawnForPromotion, cellX, cellY);
-            //TODO
-            board.promotePawnWithSelectedFigure(figure, selection.pawnForPromotion[0], selection.pawnForPromotion[1]);
-            selection.pawnForPromotion = null;
-            return;
-        }
-
-
-        if (selection.isDragAndDrop) {
-            try {
-                selection.possibleMoves.forEach((move) -> {
-                    if (move[0].equals(cellX) && move[1].equals(cellY)) {
-                        moveSelectedFigure(cellX, cellY, selection.x, selection.y);
-                    }
-                });
-
-            } finally {
-                selection.isDragAndDrop = false;
+        if (!isGameOver) {
+            if (selection.pawnForPromotion != null) {
+                // check selected figure
+                var figure = getSelectedFigure(selection.pawnForPromotion, cellX, cellY);
+                //TODO
+                board.promotePawnWithSelectedFigure(figure, selection.pawnForPromotion[0], selection.pawnForPromotion[1]);
+                selection.pawnForPromotion = null;
+                return;
             }
-        } else if (selection.selected) {
-            boolean actionMade = false;
-            for (int i = 0; i < selection.possibleMoves.size(); i++) {
-                var v = selection.possibleMoves.get(i);
-                if (cellX.equals(v[0]) && cellY.equals(v[1])) {
-                    var selected = board.getCell(selection.x, selection.y);
-                    if (!isSameColor(cell, selected)) {
-                        if (getFiguresColor(selected).equals(board.currentColor)) {
+
+
+            if (selection.isDragAndDrop) {
+                try {
+                    selection.possibleMoves.forEach((move) -> {
+                        if (move[0].equals(cellX) && move[1].equals(cellY)) {
                             moveSelectedFigure(cellX, cellY, selection.x, selection.y);
-                            actionMade = true;
+                        }
+                    });
+
+                } finally {
+                    selection.isDragAndDrop = false;
+                }
+            } else if (selection.selected) {
+                boolean actionMade = false;
+                for (int i = 0; i < selection.possibleMoves.size(); i++) {
+                    var v = selection.possibleMoves.get(i);
+                    if (cellX.equals(v[0]) && cellY.equals(v[1])) {
+                        var selected = board.getCell(selection.x, selection.y);
+                        if (!isSameColor(cell, selected)) {
+                            if (getFiguresColor(selected).equals(board.currentColor)) {
+                                moveSelectedFigure(cellX, cellY, selection.x, selection.y);
+                                actionMade = true;
+                            }
                         }
                     }
                 }
-            }
-            selection.selected = false;
+                selection.selected = false;
 
-            if (!actionMade && board.getCell(cellX, cellY) != 10) {
+                if (!actionMade && board.getCell(cellX, cellY) != 10) {
+                    selectFigure(cellX, cellY, cell);
+                    selection.isDragAndDrop = true;
+                } else {
+                    selection.isDragAndDrop = false;
+                }
+
+            } else if (cell != 10) {
                 selectFigure(cellX, cellY, cell);
-                selection.isDragAndDrop = true;
-            } else {
-                selection.isDragAndDrop = false;
             }
-
-        } else if (cell != 10) {
-            selectFigure(cellX, cellY, cell);
         }
+
 
     }
 
