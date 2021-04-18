@@ -2,6 +2,7 @@ package chess.game.chess;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -11,7 +12,7 @@ public class ChessBoard {
 
     public Integer[][] field = new Integer[8][8];
     public String currentColor = "WHITE";
-    public List<Integer[]> history = new ArrayList<>();
+    public List<Integer[]> history = Collections.synchronizedList(new ArrayList<>());
 
     public ChessBoard() {
         initField();

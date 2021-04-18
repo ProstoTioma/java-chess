@@ -26,10 +26,10 @@ public class Game implements Runnable{
 
         board = new ChessBoard();
 
-//        players.add(new Player("Player"));
+        players.add(new Player("Player"));
 //        players.add(new Player("Player2"));
         players.add(new BotPlayer("botPlayer", this));
-        players.add(new BotPlayer("botPlayer2", this));
+//        players.add(new BotPlayer("botPlayer2", this));
 
 
         mouseHandler.addOnPressedListener((MouseEvent event) -> {
