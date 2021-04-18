@@ -32,10 +32,10 @@ public class Bot {
                 movesMap.put(figure, moves);
             }
         });
-        if (game.isMate(game.currentColor, game.field)) {
+        /*if (game.isMate(game.currentColor, game.field)) {
             System.out.println("Mate! Winner: " + nextColor);
             return;
-        }
+        }*/
         movesMap.forEach((figure, moves) -> {
             Integer[] bestMove = moves.get(0);
             var bestMoveScore = -10;
@@ -86,6 +86,7 @@ public class Bot {
         game.moveFigure(game.field, bestMove[2], bestMove[3], bestMove[0], bestMove[1]);
 //        game.changePawnToQueen(bestMove[2], bestMove[3]);
         game.history.add(bestMove);
+        System.out.printf("Figure from %s%s to %s%s\n", nameOfLettersX.get(bestMove[0]), nameOfLettersY.get(bestMove[1]), nameOfLettersX.get(bestMove[2]), nameOfLettersY.get(bestMove[3]));
         game.nextColor();
     }
 

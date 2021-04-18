@@ -99,7 +99,7 @@ public class Screen extends Canvas {
 
     public void gameLoop() throws InterruptedException, IOException {
         while (true) {
-            Thread.sleep(50);
+            Thread.sleep(20);
             draw();
         }
     }

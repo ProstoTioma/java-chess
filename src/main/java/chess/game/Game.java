@@ -23,11 +23,10 @@ public class Game implements Runnable{
 
     public Game() {
         initField();
-
         players.add(new Player("Player"));
-//        players.add(new Player("Player2"));
-        players.add(new BotPlayer("botPlayer", this));
-//        players.add(new BotPlayer("botPlayer2", this));
+        players.add(new Player("Player2"));
+        /*players.add(new BotPlayer("botPlayer", this));
+        players.add(new BotPlayer("botPlayer2", this));*/
 
 
         mouseHandler.addOnPressedListener((MouseEvent event) -> {
@@ -46,6 +45,45 @@ public class Game implements Runnable{
         });
         new Thread(this).start();
     }
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                var currentPlayer = getCurrentPlayer();
+                if (currentPlayer instanceof BotPlayer) {
+                    if(!isDraw() && !isStaleMate(field, currentColor))
+                        ((BotPlayer) currentPlayer).makeMove();
+                    else if(isDraw()){
+                        System.out.println("Draw! " + history.size() / 2);
+                        return;
+                    } else if(isStaleMate(field, currentColor)) {
+                        System.out.println("Stale Mate! " + history.size() / 2);
+                        return;
+                    }
+                }
+
+                if(isDraw()) {
+                    System.out.println("Draw! " + history.size() / 2);
+                    return;
+                }
+                if(isStaleMate(field, currentColor)) {
+                    System.out.println("Stale Mate! " + history.size() / 2);
+                    return;
+                }
+
+                if(isMate(currentColor, field)) {
+                    var nextColor = (currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
+                    System.out.printf("Mate! Winner: %s. %d moves", nextColor, history.size() / 2 + 1);
+                    return;
+                }
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public static Integer[][] deepCopy(Integer[][] org) {
         if (org == null) {
             return null;
@@ -58,19 +96,27 @@ public class Game implements Runnable{
         return res;
     }
 
-    @Override
-    public void run() {
-        while (true) {
-            try {
-                var currentPlayer = getCurrentPlayer();
-                if (currentPlayer instanceof BotPlayer) {
-                    ((BotPlayer) currentPlayer).makeMove();
-                }
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+    public boolean isDraw() {
+        if(history.size() > 9) {
+            var moveL = history.get(history.size() - 1);
+            var moveP = history.get(history.size() - 2);
+            if(Arrays.equals(moveL, history.get(history.size() - 5)) && Arrays.equals(moveL, history.get(history.size() - 9))
+                    && Arrays.equals(moveP, history.get(history.size() - 6)) && Arrays.equals(moveP, history.get(history.size() -  10))) {
+                return true;
             }
         }
+        var bFigures = getAllFiguresByColor("BLACK", field);
+        var wFigures = getAllFiguresByColor("WHITE", field);
+        return bFigures.size() == 1 && wFigures.size() == 1;
+    }
+
+    public boolean isStaleMate(Integer[][] field, String color) {
+        if(!isMate(color, field)) {
+            var figures = getAllFiguresByColor(color, field);
+            int count = (int) figures.stream().filter(move -> getValidPossibleMoves(move[0], move[1], field).size() != 0).count();
+            return count == 0;
+        }
+        return false;
     }
 
     private Player getCurrentPlayer() {
@@ -140,7 +186,7 @@ public class Game implements Runnable{
         System.out.printf("Figure from %s%s to %s%s\n", nameOfLettersX.get(selection.x), nameOfLettersY.get(selection.y), nameOfLettersX.get(cellX), nameOfLettersY.get(cellY));
         selection.selected = false;
         var nextColor = (currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
-        if (isMate(currentColor, field)) System.out.println("Mate! Winner: " + nextColor);
+        //if(isMate(currentColor, field)) System.out.printf("Mate! Winner: %s. %d moves", nextColor, history.size() / 2);
 
     }
 
@@ -158,44 +204,50 @@ public class Game implements Runnable{
             selection.pawnForPromotion = null;
             return;
         }
+        if(!isDraw() && !isStaleMate(field, currentColor)) {
 
-
-        if (selection.isDragAndDrop) {
-            try {
-                selection.possibleMoves.forEach((move) -> {
-                    if (move[0].equals(cellX) && move[1].equals(cellY)) {
-                        moveSelectedFigure(field ,cellX, cellY, selection.x, selection.y);
-                    }
-                });
-
-            } finally {
-                selection.isDragAndDrop = false;
-            }
-        } else if (selection.selected) {
-            boolean actionMade = false;
-            for (int i = 0; i < selection.possibleMoves.size(); i++) {
-                var v = selection.possibleMoves.get(i);
-                if (cellX.equals(v[0]) && cellY.equals(v[1])) {
-                    var selected = field[selection.x][selection.y];
-                    if (!isSameColor(cell, selected)) {
-                        if (getFiguresColor(selected).equals(currentColor)) {
+            if (selection.isDragAndDrop) {
+                try {
+                    selection.possibleMoves.forEach((move) -> {
+                        if (move[0].equals(cellX) && move[1].equals(cellY)) {
                             moveSelectedFigure(field, cellX, cellY, selection.x, selection.y);
-                            actionMade = true;
+                        }
+                    });
+
+                } finally {
+                    selection.isDragAndDrop = false;
+                }
+            } else if (selection.selected) {
+                boolean actionMade = false;
+                for (int i = 0; i < selection.possibleMoves.size(); i++) {
+                    var v = selection.possibleMoves.get(i);
+                    if (cellX.equals(v[0]) && cellY.equals(v[1])) {
+                        var selected = field[selection.x][selection.y];
+                        if (!isSameColor(cell, selected)) {
+                            if (getFiguresColor(selected).equals(currentColor)) {
+                                moveSelectedFigure(field, cellX, cellY, selection.x, selection.y);
+                                actionMade = true;
+                            }
                         }
                     }
                 }
-            }
-            selection.selected = false;
+                selection.selected = false;
 
-            if (!actionMade && field[cellX][cellY] != 10) {
+                if (!actionMade && field[cellX][cellY] != 10) {
+                    selectFigure(cellX, cellY, cell);
+                    selection.isDragAndDrop = true;
+                } else {
+                    selection.isDragAndDrop = false;
+                }
+
+            } else if (cell != 10) {
                 selectFigure(cellX, cellY, cell);
-                selection.isDragAndDrop = true;
-            } else {
-                selection.isDragAndDrop = false;
             }
+        } else if(isDraw()){
+            System.out.println("Draw!");
+        } else if(isStaleMate(field, currentColor)) {
+            System.out.println("Stale Mate!");
 
-        } else if (cell != 10) {
-            selectFigure(cellX, cellY, cell);
         }
 
     }
