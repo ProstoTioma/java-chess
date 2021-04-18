@@ -6,12 +6,15 @@ import chess.game.player.PlayerType;
 import chess.input.MouseHandler;
 
 import java.awt.event.MouseEvent;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static chess.game.FigureUtils.*;
 
-public class Game implements Runnable{
+public class Game implements Runnable {
 
     public final Integer[][] field = new Integer[8][8];
     public final Selection selection = new Selection(0, 0, false);
@@ -24,9 +27,9 @@ public class Game implements Runnable{
     public Game() {
         initField();
         players.add(new Player("Player"));
-        players.add(new Player("Player2"));
-        /*players.add(new BotPlayer("botPlayer", this));
-        players.add(new BotPlayer("botPlayer2", this));*/
+        /*players.add(new Player("Player2"));*/
+        /*players.add(new BotPlayer("botPlayer", this));*/
+        players.add(new BotPlayer("botPlayer2", this));
 
 
         mouseHandler.addOnPressedListener((MouseEvent event) -> {
@@ -47,33 +50,55 @@ public class Game implements Runnable{
         new Thread(this).start();
     }
 
+    public static String getFiguresColor(Integer code) {
+        if (code < 17 && code > 10) return "BLACK";
+        else if (code > 17) return "WHITE";
+        else return "VOID";
+    }
+
+    public static Integer[][] deepCopy(Integer[][] org) {
+        if (org == null) {
+            return null;
+        }
+
+        final Integer[][] res = new Integer[org.length][];
+        for (int i = 0; i < org.length; i++) {
+            res[i] = Arrays.copyOf(org[i], org[i].length);
+        }
+        return res;
+    }
+
     @Override
     public void run() {
         while (true) {
             try {
                 var currentPlayer = getCurrentPlayer();
                 if (currentPlayer instanceof BotPlayer) {
-                    if(!isDraw() && !isStaleMate(field, currentColor))
+                    if (!isDraw() && !isStaleMate(field, currentColor) && !isMate(currentColor, field))
                         ((BotPlayer) currentPlayer).makeMove();
-                    else if(isDraw()){
-                        System.out.println("Draw! " + history.size() / 2);
+                    else if (isDraw()) {
+                        System.out.println("Draw! " + history.size() / 2 + 1);
                         return;
-                    } else if(isStaleMate(field, currentColor)) {
-                        System.out.println("Stale Mate! " + history.size() / 2);
+                    } else if (isStaleMate(field, currentColor)) {
+                        System.out.println("Stale Mate! " + history.size() / 2 + 1);
+                        return;
+                    } else {
+                        var nextColor = (currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
+                        System.out.printf("Mate! Winner: %s. %d moves", nextColor, history.size() / 2 + 2);
                         return;
                     }
                 }
 
-                if(isDraw()) {
-                    System.out.println("Draw! " + history.size() / 2);
+                if (isDraw()) {
+                    System.out.println("Draw! " + history.size() / 2 + 1);
                     return;
                 }
-                if(isStaleMate(field, currentColor)) {
-                    System.out.println("Stale Mate! " + history.size() / 2);
+                if (isStaleMate(field, currentColor)) {
+                    System.out.println("Stale Mate! " + history.size() / 2 + 1);
                     return;
                 }
 
-                if(isMate(currentColor, field)) {
+                if (isMate(currentColor, field)) {
                     var nextColor = (currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
                     System.out.printf("Mate! Winner: %s. %d moves", nextColor, history.size() / 2 + 1);
                     return;
@@ -85,13 +110,12 @@ public class Game implements Runnable{
         }
     }
 
-
     public boolean isDraw() {
-        if(history.size() > 9) {
+        if (history.size() > 9) {
             var moveL = history.get(history.size() - 1);
             var moveP = history.get(history.size() - 2);
-            if(Arrays.equals(moveL, history.get(history.size() - 5)) && Arrays.equals(moveL, history.get(history.size() - 9))
-                    && Arrays.equals(moveP, history.get(history.size() - 6)) && Arrays.equals(moveP, history.get(history.size() -  10))) {
+            if (Arrays.equals(moveL, history.get(history.size() - 5)) && Arrays.equals(moveL, history.get(history.size() - 9))
+                    && Arrays.equals(moveP, history.get(history.size() - 6)) && Arrays.equals(moveP, history.get(history.size() - 10))) {
                 return true;
             }
         }
@@ -101,7 +125,7 @@ public class Game implements Runnable{
     }
 
     public boolean isStaleMate(Integer[][] field, String color) {
-        if(!isMate(color, field)) {
+        if (!isMate(color, field)) {
             var figures = getAllFiguresByColor(color, field);
             int count = (int) figures.stream().filter(move -> getValidPossibleMoves(move[0], move[1], field).size() != 0).count();
             return count == 0;
@@ -145,7 +169,7 @@ public class Game implements Runnable{
 
     }
 
-    public void moveFigure(Integer[][] chessField,Integer cellX, Integer cellY, Integer figureX, Integer figureY) {
+    public void moveFigure(Integer[][] chessField, Integer cellX, Integer cellY, Integer figureX, Integer figureY) {
         chessField[cellX][cellY] = chessField[figureX][figureY];
         if (isLongCastlingMove(cellX, figureX, figureY, chessField)) {
             chessField[cellX + 1][cellY] = chessField[0][cellY];
@@ -163,10 +187,10 @@ public class Game implements Runnable{
             // check selected figure
             changePawnToQueen(pawn[0], pawn[1]);
         }
-        history.add(new Integer[]{selection.x, selection.y, cellX, cellY});
+//        history.add(new Integer[]{selection.x, selection.y, cellX, cellY});
     }
 
-    private void moveSelectedFigure(Integer[][] chessField,Integer cellX, Integer cellY, Integer figureX, Integer figureY) {
+    private void moveSelectedFigure(Integer[][] chessField, Integer cellX, Integer cellY, Integer figureX, Integer figureY) {
         moveFigure(chessField, cellX, cellY, figureX, figureY);
 
         selection.pawnForPromotion = getPawnForPromotion(chessField);
@@ -195,7 +219,7 @@ public class Game implements Runnable{
             selection.pawnForPromotion = null;
             return;
         }
-        if(!isDraw() && !isStaleMate(field, currentColor)) {
+        if (!isDraw() && !isStaleMate(field, currentColor)) {
 
             if (selection.isDragAndDrop) {
                 try {
@@ -234,9 +258,9 @@ public class Game implements Runnable{
             } else if (cell != 10) {
                 selectFigure(cellX, cellY, cell);
             }
-        } else if(isDraw()){
+        } else if (isDraw()) {
             System.out.println("Draw!");
-        } else if(isStaleMate(field, currentColor)) {
+        } else if (isStaleMate(field, currentColor)) {
             System.out.println("Stale Mate!");
 
         }
@@ -268,12 +292,6 @@ public class Game implements Runnable{
             }
         }
         return figuresList;
-    }
-
-    public static String getFiguresColor(Integer code) {
-        if(code < 17 && code > 10) return "BLACK";
-        else if(code > 17) return "WHITE";
-        else return "VOID";
     }
 
     public Integer[] getCellCoordinates(Integer x, Integer y) {
@@ -468,8 +486,8 @@ public class Game implements Runnable{
     public Integer[] getPawnForPromotion(Integer[][] chessField) {
         int pawnCode = (currentColor.equals("WHITE")) ? 21 : 11;
         int y = (currentColor.equals("WHITE")) ? 0 : 7;
-        for (Integer[] figure:  getAllFiguresByColor(currentColor, chessField)) {
-            if(chessField[figure[0]][figure[1]] == pawnCode && figure[1] == y) {
+        for (Integer[] figure : getAllFiguresByColor(currentColor, chessField)) {
+            if (chessField[figure[0]][figure[1]] == pawnCode && figure[1] == y) {
                 return figure;
             }
         }
@@ -498,18 +516,6 @@ public class Game implements Runnable{
             }
         }
         return null;
-    }
-
-    public static Integer[][] deepCopy(Integer[][] org) {
-        if (org == null) {
-            return null;
-        }
-
-        final Integer[][] res = new Integer[org.length][];
-        for (int i = 0; i < org.length; i++) {
-            res[i] = Arrays.copyOf(org[i], org[i].length);
-        }
-        return res;
     }
 
 }

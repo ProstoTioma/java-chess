@@ -100,7 +100,7 @@ public class Bot {
         System.out.printf("Figure from %s%s to %s%s\n", nameOfLettersX.get(game.selection.x), nameOfLettersY.get(game.selection.y), nameOfLettersX.get(randomMove[0]), nameOfLettersY.get(randomMove[1]));
         game.field[randomMove[0]][randomMove[1]] = game.field[selectedFigure[0]][selectedFigure[1]];
         game.field[selectedFigure[0]][selectedFigure[1]] = 10;
-        game.history.add(new Integer[]{randomMove[0], randomMove[1], selectedFigure[0], selectedFigure[1]});
+        /*game.history.add(new Integer[]{randomMove[0], randomMove[1], selectedFigure[0], selectedFigure[1]});*/
     }
 
 }
