@@ -25,8 +25,8 @@ public class Game implements Runnable{
         initField();
 
         players.add(new Player("Player"));
-//        players.add(new Player("Player2"));
-        players.add(new BotPlayer("botPlayer", this));
+        players.add(new Player("Player2"));
+//        players.add(new BotPlayer("botPlayer", this));
 //        players.add(new BotPlayer("botPlayer2", this));
 
 
@@ -38,6 +38,7 @@ public class Game implements Runnable{
         mouseHandler.addOnReleasedListener((MouseEvent event) -> {
             if (getCurrentPlayer().type == PlayerType.LOCAL) {
                 localPlayerMove(event.getX(), event.getY());
+                selection.isDragAndDrop = false;
             }
         });
         mouseHandler.addOnDraggedListener((MouseEvent event) -> {
@@ -45,17 +46,6 @@ public class Game implements Runnable{
             selection.mouseY = event.getY();
         });
         new Thread(this).start();
-    }
-    public static Integer[][] deepCopy(Integer[][] org) {
-        if (org == null) {
-            return null;
-        }
-
-        final Integer[][] res = new Integer[org.length][];
-        for (int i = 0; i < org.length; i++) {
-            res[i] = Arrays.copyOf(org[i], org[i].length);
-        }
-        return res;
     }
 
     @Override
@@ -111,10 +101,10 @@ public class Game implements Runnable{
 
     public void moveFigure(Integer[][] chessField,Integer cellX, Integer cellY, Integer figureX, Integer figureY) {
         chessField[cellX][cellY] = chessField[figureX][figureY];
-        if (isLongCastlingMove(cellX)) {
+        if (isLongCastlingMove(cellX, figureX, figureY, chessField)) {
             chessField[cellX + 1][cellY] = chessField[0][cellY];
             chessField[0][cellY] = 10;
-        } else if (isShortCastlingMove(cellX)) {
+        } else if (isShortCastlingMove(cellX, figureX, figureY, chessField)) {
             chessField[cellX - 1][cellY] = chessField[7][cellY];
             chessField[7][cellY] = 10;
         }
@@ -127,6 +117,7 @@ public class Game implements Runnable{
             // check selected figure
             changePawnToQueen(pawn[0], pawn[1]);
         }
+        history.add(new Integer[]{selection.x, selection.y, cellX, cellY});
     }
 
     private void moveSelectedFigure(Integer[][] chessField,Integer cellX, Integer cellY, Integer figureX, Integer figureY) {
@@ -136,7 +127,7 @@ public class Game implements Runnable{
 
         nextColor();
         //isCheck(currentColor, field);
-        history.add(new Integer[]{selection.x, selection.y, cellX, cellY});
+        //history.add(new Integer[]{selection.x, selection.y, cellX, cellY});
         System.out.printf("Figure from %s%s to %s%s\n", nameOfLettersX.get(selection.x), nameOfLettersY.get(selection.y), nameOfLettersX.get(cellX), nameOfLettersY.get(cellY));
         selection.selected = false;
         var nextColor = (currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
@@ -206,14 +197,6 @@ public class Game implements Runnable{
         if (getFiguresColor(cell).equals(currentColor)) {
             var possibleMoves = getValidPossibleMoves(selection.x, selection.y, field);
             selection.possibleMoves = possibleMoves;
-            if ((cell == 16 || cell == 26) && canCastling(false)) {
-                possibleMoves = validateLongCastling(possibleMoves);
-                selection.possibleMoves = possibleMoves;
-            }
-            if ((cell == 16 || cell == 26) && canCastling(true)) {
-                possibleMoves = validateShortCastling(possibleMoves);
-                selection.possibleMoves = possibleMoves;
-            }
             selection.isDragAndDrop = true;
         } else {
             selection.possibleMoves = Collections.emptyList();
@@ -251,7 +234,7 @@ public class Game implements Runnable{
         return null;
     }
 
-    public ArrayList<Integer[]> getPossibleMoves(Integer x, Integer y, Integer[][] chessField) {
+    public List<Integer[]> getPossibleMoves(Integer x, Integer y, Integer[][] chessField) {
         var possibleMoves = new ArrayList<Integer[]>();
         if (chessField[x][y] == 11 || chessField[x][y] == 21) possibleMoves = getPossibleMovesPawn(x, y, chessField);
         if (chessField[x][y] == 13 || chessField[x][y] == 23) possibleMoves = getPossibleMovesKnight(x, y, chessField);
@@ -266,9 +249,9 @@ public class Game implements Runnable{
 
     public List<Integer[]> getValidPossibleMoves(Integer x, Integer y, Integer[][] chessField) {
         var possibleMoves = getPossibleMoves(x, y, chessField);
-        ArrayList<Integer[]> validMoves = new ArrayList<>();
+        List<Integer[]> validMoves = new ArrayList<>();
 
-        possibleMoves.forEach((move) -> {
+        for (Integer[] move : possibleMoves) {
             Integer[][] copyField = deepCopy(chessField);
             copyField[move[0]][move[1]] = copyField[x][y];
             copyField[x][y] = 10;
@@ -277,7 +260,14 @@ public class Game implements Runnable{
                 validMoves.add(move);
             }
 
-        });
+        }
+
+        if ((chessField[x][y] == 16 || chessField[x][y] == 26) && canCastling(false)) {
+            validMoves = validateLongCastling(validMoves);
+        }
+        if ((chessField[x][y] == 16 || chessField[x][y] == 26) && canCastling(true)) {
+            validMoves = validateShortCastling(validMoves);
+        }
 
         return validMoves;
     }
@@ -361,16 +351,16 @@ public class Game implements Runnable{
         }
     }
 
-    private boolean isLongCastlingMove(Integer x) {
-        if (field[selection.x][selection.y] == 16 || field[selection.x][selection.y] == 26) {
-            return selection.x - x == 2;
+    private boolean isLongCastlingMove(Integer moveX, Integer figureX, Integer figureY, Integer[][] chessField) {
+        if (chessField[figureX][figureY] == 16 || chessField[figureX][figureY] == 26) {
+            return figureX - moveX == 2;
         }
         return false;
     }
 
-    private boolean isShortCastlingMove(Integer x) {
-        if (field[selection.x][selection.y] == 16 || field[selection.x][selection.y] == 26) {
-            return selection.x - x == -2;
+    private boolean isShortCastlingMove(Integer moveX, Integer figureX, Integer figureY, Integer[][] chessField) {
+        if (chessField[figureX][figureY] == 16 || chessField[figureX][figureY] == 26) {
+            return figureX - moveX == -2;
         }
         return false;
     }
@@ -456,6 +446,18 @@ public class Game implements Runnable{
             }
         }
         return null;
+    }
+
+    public static Integer[][] deepCopy(Integer[][] org) {
+        if (org == null) {
+            return null;
+        }
+
+        final Integer[][] res = new Integer[org.length][];
+        for (int i = 0; i < org.length; i++) {
+            res[i] = Arrays.copyOf(org[i], org[i].length);
+        }
+        return res;
     }
 
 }

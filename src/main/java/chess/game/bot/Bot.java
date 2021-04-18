@@ -3,7 +3,6 @@ package chess.game.bot;
 import chess.game.FigureUtils;
 import chess.game.Game;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
