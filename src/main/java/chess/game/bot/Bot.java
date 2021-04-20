@@ -41,7 +41,7 @@ public class Bot {
             for (Integer[] move : moves) {
                 Integer score = FigureUtils.figuresValue.get(game.board.getCell(move[0], move[1]));
 
-                if (isPawn(game.board.getCell(figure[0], figure[1])) && onOpositeSide(nextColor, move[1])) {
+                if (isPawn(game.board.getCell(figure[0], figure[1])) && onOppositeSide(nextColor, move[1])) {
                     score += 1;
                     if (move[1] == 7 || move[1] == 0) {
                         score += 9;
@@ -65,6 +65,7 @@ public class Bot {
                 //TODO don't move a king w/out reason
 
                 if (copyBoard.isCheck(nextColor, copyBoard.field)) {
+                    if(score <= 1)
                     score = 1;
                 }
                 if (copyBoard.isMate()) {
@@ -89,13 +90,13 @@ public class Bot {
         game.board.moveFigure(bestMove[2], bestMove[3], bestMove[0], bestMove[1], getPromotionCode(nextColor));
     }
 
-    private boolean onOpositeSide(String color, Integer y) {
+    private boolean onOppositeSide(String color, Integer y) {
         return color.equals("WHITE") ?  (y > 5) : (y < 3);
     }
 
     //always promote to queen
     private Integer getPromotionCode(String color) {
-        return color.equals("WHITE") ? 25 : 15;
+        return color.equals("WHITE") ? 15 : 25;
     }
 
     public void makeBotRandomMove() {

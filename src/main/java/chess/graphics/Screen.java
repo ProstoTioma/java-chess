@@ -115,7 +115,7 @@ public class Screen extends Canvas {
         drawPossibleMoves(g);
         drawCellBorder(g);
         drawChessField(g);
-        drawSideBar(g);
+        //drawSideBar(g);
         drawDragAndDrop(g);
 
         drawFigureSelectionPopup(g);
