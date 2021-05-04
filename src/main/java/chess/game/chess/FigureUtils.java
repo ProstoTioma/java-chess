@@ -14,13 +14,13 @@ public class FigureUtils {
 
     static {
         figuresValue.put(10, 0);
-        figuresValue.put(11, 2);
+        figuresValue.put(11, 1);
         figuresValue.put(12, 5);
         figuresValue.put(13, 3);
         figuresValue.put(14, 3);
         figuresValue.put(15, 9);
         figuresValue.put(16, 10);
-        figuresValue.put(21, 2);
+        figuresValue.put(21, 1);
         figuresValue.put(22, 5);
         figuresValue.put(23, 3);
         figuresValue.put(24, 3);

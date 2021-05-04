@@ -36,13 +36,13 @@ public class Bot {
             return;
         }
         movesMap.forEach((figure, moves) -> {
-            Integer[] bestMove = moves.get(0);
+            Integer[] bestMove = null;
             var bestMoveScore = -10;
             for (Integer[] move : moves) {
                 Integer score = FigureUtils.figuresValue.get(game.board.getCell(move[0], move[1]));
 
                 if (isPawn(game.board.getCell(figure[0], figure[1])) && onOppositeSide(nextColor, move[1])) {
-                    score += 1;
+//                    score += 1;
                     if (move[1] == 7 || move[1] == 0) {
                         score += 9;
                     }
@@ -50,7 +50,7 @@ public class Bot {
                 var copyBoard = game.board.copy();
                 copyBoard.moveFigure(move[0], move[1], figure[0], figure[1], getPromotionCode(nextColor));
                 //get enemy moves
-                var maxEnemyScore = game.board.getAllFiguresByColor(nextColor)
+                var maxEnemyScore = copyBoard.getAllFiguresByColor(nextColor)
                         .stream().map(enemyFigure -> {
                             var enemyMoves = copyBoard.getValidPossibleMoves(enemyFigure[0], enemyFigure[1]);
                             if (enemyMoves.size() > 0) {
@@ -65,7 +65,7 @@ public class Bot {
                 //TODO don't move a king w/out reason
 
                 if (copyBoard.isCheck(nextColor, copyBoard.field)) {
-                    if(score <= 1)
+                    if(score <= 0)
                     score = 1;
                 }
                 if (copyBoard.isMate()) {
@@ -77,8 +77,9 @@ public class Bot {
                     bestMoveScore = totalScoreOfMove;
                 }
             }
-            if (bestMove != null)
+            if (bestMove != null) {
                 bestMovesMap.put(new Integer[]{figure[0], figure[1], bestMove[0], bestMove[1]}, bestMoveScore);
+            }
         });
 
         var bestMoveList = bestMovesMap.entrySet().stream()
