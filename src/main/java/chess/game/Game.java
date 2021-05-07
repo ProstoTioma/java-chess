@@ -26,10 +26,10 @@ public class Game implements Runnable{
 
         board = new ChessBoard();
 
-//        players.add(new Player("Player"));
+        players.add(new Player("Player"));
 //        players.add(new Player("Player2"));
         players.add(new BotPlayer("botPlayer", this));
-        players.add(new BotPlayer("botPlayer2", this));
+//        players.add(new BotPlayer("botPlayer2", this));
 
 
         mouseHandler.addOnPressedListener((MouseEvent event) -> {
@@ -78,7 +78,7 @@ public class Game implements Runnable{
                     System.out.printf("Mate! Winner: %s. %d moves", nextColor, board.history.size() / 2);
                     return;
                 }
-                Thread.sleep(1000);
+                Thread.sleep(200);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

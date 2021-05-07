@@ -1,5 +1,6 @@
 package chess.game.bot;
 
+import chess.game.chess.ChessBoard;
 import chess.game.chess.FigureUtils;
 import chess.game.Game;
 
@@ -19,35 +20,50 @@ public class Bot {
         this.game = game;
     }
 
+    public void olejBotMove() {
+
+    }
+
 
     public void makeBotMove() {
         var nextColor = (game.board.currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
+        var bestMoveInfo = getBestMove(game.board,  1);
+
+        var bestMove = bestMoveInfo.getKey();
+
+        if (bestMove != null) {
+            game.board.moveFigure(bestMove[2], bestMove[3], bestMove[0], bestMove[1], getPromotionCode(nextColor));
+        }
+    }
+
+    public Map.Entry<Integer[], Integer> getBestMove(ChessBoard board, int deep) {
+        var nextColor = (board.currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
         var movesMap = new HashMap<Integer[], List<Integer[]>>();
         // Integer[]{x, y, xx, yy}, score
         var bestMovesMap = new HashMap<Integer[], Integer>();
-        game.board.getAllFiguresByColor(game.board.currentColor).forEach(figure -> {
-            var moves = game.board.getValidPossibleMoves(figure[0], figure[1]);
+        board.getAllFiguresByColor(board.currentColor).forEach(figure -> {
+            var moves = board.getValidPossibleMoves(figure[0], figure[1]);
             if (moves.size() > 0) {
                 movesMap.put(figure, moves);
             }
         });
-        if (game.board.isMate()) {
+        if (board.isMate()) {
             System.out.println("Mate! Winner: " + nextColor);
-            return;
+            return null;
         }
         movesMap.forEach((figure, moves) -> {
             Integer[] bestMove = null;
             var bestMoveScore = -10;
             for (Integer[] move : moves) {
-                Integer score = FigureUtils.figuresValue.get(game.board.getCell(move[0], move[1]));
+                Integer score = FigureUtils.figuresValue.get(board.getCell(move[0], move[1]));
 
-                if (isPawn(game.board.getCell(figure[0], figure[1])) && onOppositeSide(nextColor, move[1])) {
+                if (isPawn(board.getCell(figure[0], figure[1])) && onOppositeSide(nextColor, move[1])) {
 //                    score += 1;
                     if (move[1] == 7 || move[1] == 0) {
                         score += 9;
                     }
                 }
-                var copyBoard = game.board.copy();
+                var copyBoard = board.copy();
                 copyBoard.moveFigure(move[0], move[1], figure[0], figure[1], getPromotionCode(nextColor));
                 //get enemy moves
                 var maxEnemyScore = copyBoard.getAllFiguresByColor(nextColor)
@@ -84,11 +100,17 @@ public class Bot {
 
         var bestMoveList = bestMovesMap.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue()).collect(Collectors.toList());
+
         var minvalue = bestMoveList.get(bestMoveList.size() - 1).getValue();
         bestMoveList = bestMoveList.stream().filter(bm -> bm.getValue().equals(minvalue)).collect(Collectors.toList());
+
+
+
         var randomBestMoveIndex =  ThreadLocalRandom.current().nextInt(0, bestMoveList.size());
-        var bestMove = bestMoveList.get(randomBestMoveIndex).getKey();
-        game.board.moveFigure(bestMove[2], bestMove[3], bestMove[0], bestMove[1], getPromotionCode(nextColor));
+
+
+        var bestMoveInfo = bestMoveList.get(randomBestMoveIndex);
+        return bestMoveInfo;
     }
 
     private boolean onOppositeSide(String color, Integer y) {
