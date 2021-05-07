@@ -6,10 +6,10 @@ import chess.game.bot.Bot;
 public class BotPlayer extends Player {
     Bot bot;
 
-    public BotPlayer(String name, Game g) {
+    public BotPlayer(String name, Game g, Bot bot) {
         super(name);
         type = PlayerType.BOT;
-        bot = new Bot(g);
+        this.bot = bot;
     }
 
     public void makeMove() {

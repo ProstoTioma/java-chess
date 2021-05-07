@@ -1,5 +1,7 @@
 package chess.game;
 
+import chess.game.bot.Bot1;
+import chess.game.bot.Bot2;
 import chess.game.chess.ChessBoard;
 import chess.game.player.BotPlayer;
 import chess.game.player.Player;
@@ -26,10 +28,10 @@ public class Game implements Runnable{
 
         board = new ChessBoard();
 
-        players.add(new Player("Player"));
+//        players.add(new Player("Player"));
 //        players.add(new Player("Player2"));
-        players.add(new BotPlayer("botPlayer", this));
-//        players.add(new BotPlayer("botPlayer2", this));
+        players.add(new BotPlayer("botPlayer", this, new Bot1(this)));
+        players.add(new BotPlayer("botPlayer2", this, new Bot2(this)));
 
 
         mouseHandler.addOnPressedListener((MouseEvent event) -> {
