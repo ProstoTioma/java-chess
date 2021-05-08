@@ -30,8 +30,9 @@ public class Game implements Runnable{
 
 //        players.add(new Player("Player"));
 //        players.add(new Player("Player2"));
-        players.add(new BotPlayer("botPlayer", this, new Bot1(this)));
-        players.add(new BotPlayer("botPlayer2", this, new Bot2(this)));
+        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 4)));
+        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 3)));
+//        players.add(new BotPlayer("botPlayer2", this, new Bot2(this)));
 
 
         mouseHandler.addOnPressedListener((MouseEvent event) -> {
@@ -52,6 +53,12 @@ public class Game implements Runnable{
         new Thread(this).start();
     }
 
+    void getBestMove() {
+        var bestMove = new Bot1(this, 3).getBestMove(board, 3);
+        var move = bestMove.getKey();
+        System.out.println(nameOfLettersX.get(move[0]) + nameOfLettersY.get(move[1]) + " " + nameOfLettersX.get(move[2]) + nameOfLettersY.get(move[3]));
+    }
+
     @Override
     public void run() {
         while (true) {
@@ -62,6 +69,7 @@ public class Game implements Runnable{
                         ((BotPlayer) currentPlayer).makeMove();
                     }
                 }
+
 
                 if (board.isDraw()) {
                     isGameOver = true;
@@ -110,6 +118,7 @@ public class Game implements Runnable{
         Integer cellY = coords[1];
         var cell = board.getCell(cellX, cellY);
 
+
         if (!isGameOver) {
             if (selection.pawnForPromotion != null) {
                 // check selected figure
@@ -133,6 +142,7 @@ public class Game implements Runnable{
                     selection.isDragAndDrop = false;
                 }
             } else if (selection.selected) {
+                getBestMove();
                 boolean actionMade = false;
                 for (int i = 0; i < selection.possibleMoves.size(); i++) {
                     var v = selection.possibleMoves.get(i);

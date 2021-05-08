@@ -15,9 +15,11 @@ import static chess.game.chess.FigureUtils.*;
 public class Bot1 implements Bot {
 
     Game game;
+    int deep;
 
-    public Bot1(Game game) {
+    public Bot1(Game game, int deep) {
         this.game = game;
+        this.deep = deep;
     }
 
     public void olejBotMove() {
@@ -27,7 +29,7 @@ public class Bot1 implements Bot {
 
     public void makeBotMove() {
         var nextColor = (game.board.currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
-        var bestMoveInfo = getBestMove(game.board, 3);
+        var bestMoveInfo = getBestMove(game.board, deep);
 
         var bestMove = bestMoveInfo.getKey();
 
@@ -81,9 +83,9 @@ public class Bot1 implements Bot {
                     if (score <= 0)
                         score = 1;
                 }
-                if (copyBoard.isMate()) {
-                    score = 100;
-                }
+//                if (copyBoard.isMate()) {
+//                    score = 100;
+//                }
                 var totalScoreOfMove = score - maxEnemyScore;
                 if (totalScoreOfMove >= bestMoveScore) {
                     bestMove = move;
@@ -108,9 +110,10 @@ public class Bot1 implements Bot {
                     nextMovesBoard.moveFigure(currentBestMove[2], currentBestMove[3], currentBestMove[0], currentBestMove[1], getPromotionCode(nextColor));
                     var nextMove = getBestMove(nextMovesBoard, deep - 1);
                     if (nextMove != null) {
-                        moveInfo.setValue(moveInfo.getValue() + nextMove.getValue());
+                        moveInfo.setValue(moveInfo.getValue() - nextMove.getValue());
                     } else {
-                        moveInfo.setValue(moveInfo.getValue() - 100);
+                        moveInfo.setValue(moveInfo.getValue() + 150);
+
                     }
 
                 }
