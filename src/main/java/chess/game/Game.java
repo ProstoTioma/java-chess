@@ -31,8 +31,9 @@ public class Game implements Runnable{
         game = this;
 
         players.add(new Player("Player2"));
-//        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 2)));
-        players.add(new Player("Player"));
+        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 3)));
+//        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 1)));
+        /*players.add(new Player("Player"));*/
 //        players.add(new BotPlayer("botPlayer2", this, new Bot2(this)));
 
 
@@ -55,9 +56,9 @@ public class Game implements Runnable{
     }
 
     void getBestMove() {
-        var bestMove = new Bot1(this, 3).getBestMove(board, 4);
+        var bestMove = new Bot1(this, 3).getBestMove(board, 3);
         var move = bestMove.getKey();
-        System.out.println(nameOfLettersX.get(move[0]) + nameOfLettersY.get(move[1]) + " " + nameOfLettersX.get(move[2]) + nameOfLettersY.get(move[3]));
+        System.out.println(nameOfLettersX.get(move[0]) + nameOfLettersY.get(move[1]) + " " + nameOfLettersX.get(move[2]) + nameOfLettersY.get(move[3]) + " Value: " + bestMove.getValue());
     }
 
     @Override

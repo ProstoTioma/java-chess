@@ -112,7 +112,7 @@ public class Bot1 implements Bot {
                     if (nextMove != null) {
                         moveInfo.setValue(moveInfo.getValue() - nextMove.getValue());
                     } /*else {
-                        moveInfo.setValue(moveInfo.getValue() + 150);
+                        moveInfo.setValue(moveInfo.getValue() - 150);
 
                     }*/
 
