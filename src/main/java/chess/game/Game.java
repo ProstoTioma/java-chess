@@ -1,9 +1,7 @@
 package chess.game;
 
 import chess.game.bot.Bot1;
-import chess.game.bot.Bot2;
 import chess.game.chess.ChessBoard;
-import chess.game.chess.FigureUtils;
 import chess.game.player.BotPlayer;
 import chess.game.player.Player;
 import chess.game.player.PlayerType;
@@ -16,7 +14,7 @@ import java.util.List;
 
 import static chess.game.chess.FigureUtils.*;
 
-public class Game implements Runnable{
+public class Game implements Runnable {
 
     public final Selection selection = new Selection(0, 0, false);
     private final MouseHandler mouseHandler = new MouseHandler();
@@ -31,9 +29,9 @@ public class Game implements Runnable{
         game = this;
 
         players.add(new Player("Player2"));
-//        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 3)));
-//        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 1)));
-        players.add(new Player("Player"));
+        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 3)));
+        //players.add(new BotPlayer("botPlayer", this, new Bot3(this, 3)));
+//        players.add(new Player("Player"));
 //        players.add(new BotPlayer("botPlayer2", this, new Bot2(this)));
 
 
@@ -117,7 +115,7 @@ public class Game implements Runnable{
         // read input (mouse)
 
 
-        if(x < 50 && y < 50) {
+        if (x < 50 && y < 50) {
             getBestMove();
         } else {
             var coords = getCellCoordinates(x, y);
@@ -191,7 +189,6 @@ public class Game implements Runnable{
             }
 
         }
-
 
 
     }
