@@ -13,6 +13,7 @@ public class ChessBoard {
     public Integer[][] field = new Integer[8][8];
     public String currentColor = "WHITE";
     public List<Integer[]> history = Collections.synchronizedList(new ArrayList<>());
+    public List<Move> movesHistory = Collections.synchronizedList(new ArrayList<>());
 
     public ChessBoard() {
         initField();
@@ -60,13 +61,18 @@ public class ChessBoard {
     }
 
     public void moveFigure(Integer cellX, Integer cellY, Integer figureX, Integer figureY, Integer promotionCode) {
+        Cell from = new Cell(figureX, figureY, field[figureX][figureY]);
+        Cell to = new Cell(cellX, cellY, field[cellX][cellY]);
+        Move move = new Move(from, to);
         field[cellX][cellY] = field[figureX][figureY];
         if (isLongCastlingMove(cellX, figureX, figureY)) {
             field[cellX + 1][cellY] = field[0][cellY];
             field[0][cellY] = 10;
+            move.setLongCastling(true);
         } else if (isShortCastlingMove(cellX, figureX, figureY)) {
             field[cellX - 1][cellY] = field[7][cellY];
             field[7][cellY] = 10;
+            move.setShortCastling(true);
         }
         field[figureX][figureY] = 10;
         var pawn = getPawnForPromotion();
@@ -76,19 +82,21 @@ public class ChessBoard {
             if (promotionCode != null) {
                 //changePawnToQueen(pawn[0], pawn[1]);
                 promotePawnWithSelectedFigure(promotionCode, cellX, cellY);
+
                 history.add(new Integer[]{figureX, figureY, cellX, cellY});
+                move.setPromotionCode(promotionCode);
                 nextColor();
             } else {
                 history.add(new Integer[]{figureX, figureY, cellX, cellY});
-                return;
             }
+            movesHistory.add(move);
+            return;
             //todo change to promotion code instead of queen
         }
 
         history.add(new Integer[]{figureX, figureY, cellX, cellY});
+        movesHistory.add(move);
         nextColor();
-
-
     }
 
     public Integer getCell(Integer x, Integer y) {
@@ -330,6 +338,32 @@ public class ChessBoard {
         chessFieldCopy.currentColor = currentColor;
         chessFieldCopy.history = new ArrayList<>(this.history);
         return chessFieldCopy;
+    }
+
+    public void undo() {
+        var movesCount = movesHistory.size();
+        int y = currentColor.equals("WHITE") ? 0 : 7;
+        if (movesCount > 0) {
+            var lastMove = movesHistory.get(movesCount - 1);
+            var from = lastMove.from;
+            var to = lastMove.to;
+
+
+            field[from.x][from.y] = from.code;
+            field[to.x][to.y] = to.code;
+
+            if (lastMove.isLongCastling()) {
+                field[3][y] = 10;
+                field[0][y] = (y == 0) ? 12 : 22;
+            } else if (lastMove.isShortCastling()) {
+                field[5][y] = 10;
+                field[7][y] = (y == 0) ? 12 : 22;
+            }
+
+            history.remove(history.size() - 1);
+            movesHistory.remove(movesHistory.size() - 1);
+        }
+        nextColor();
     }
 
 }

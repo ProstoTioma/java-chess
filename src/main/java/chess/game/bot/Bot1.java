@@ -123,23 +123,4 @@ public class Bot1 implements Bot {
     private Integer getPromotionCode(String color) {
         return color.equals("WHITE") ? 15 : 25;
     }
-
-    public void makeBotRandomMove() {
-        var figures = game.board.getAllFiguresByColor(game.board.currentColor).stream().filter(f -> game.board.getValidPossibleMoves(f[0], f[1]).size() > 0).collect(Collectors.toList());
-        if (figures.size() > 0) {
-            var randomFigureIndex = ThreadLocalRandom.current().nextInt(0, figures.size());
-            var selectedFigure = figures.get(randomFigureIndex);
-            var moves = game.board.getValidPossibleMoves(selectedFigure[0], selectedFigure[1]);
-            var randomMoveIndex = ThreadLocalRandom.current().nextInt(0, moves.size());
-            var randomMove = moves.get(randomMoveIndex);
-            game.selection.x = selectedFigure[0];
-            game.selection.y = selectedFigure[1];
-            System.out.printf("Figure from %s%s to %s%s\n", nameOfLettersX.get(game.selection.x), nameOfLettersY.get(game.selection.y), nameOfLettersX.get(randomMove[0]), nameOfLettersY.get(randomMove[1]));
-
-            game.board.moveFigure(randomMove[0], randomMove[1], selectedFigure[0], selectedFigure[1], getPromotionCode(game.board.currentColor));
-        } else {
-            System.out.println("no moves found");
-        }
-
-    }
 }
