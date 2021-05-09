@@ -3,6 +3,7 @@ package chess.game;
 import chess.game.bot.Bot1;
 import chess.game.bot.Bot2;
 import chess.game.chess.ChessBoard;
+import chess.game.chess.FigureUtils;
 import chess.game.player.BotPlayer;
 import chess.game.player.Player;
 import chess.game.player.PlayerType;
@@ -27,11 +28,11 @@ public class Game implements Runnable{
     public Game() {
 
         board = new ChessBoard();
+        game = this;
 
-//        players.add(new Player("Player"));
-//        players.add(new Player("Player2"));
-        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 4)));
-        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 3)));
+        players.add(new Player("Player2"));
+//        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 2)));
+        players.add(new Player("Player"));
 //        players.add(new BotPlayer("botPlayer2", this, new Bot2(this)));
 
 
@@ -54,7 +55,7 @@ public class Game implements Runnable{
     }
 
     void getBestMove() {
-        var bestMove = new Bot1(this, 3).getBestMove(board, 3);
+        var bestMove = new Bot1(this, 3).getBestMove(board, 4);
         var move = bestMove.getKey();
         System.out.println(nameOfLettersX.get(move[0]) + nameOfLettersY.get(move[1]) + " " + nameOfLettersX.get(move[2]) + nameOfLettersY.get(move[3]));
     }
@@ -113,62 +114,82 @@ public class Game implements Runnable{
 
     public void localPlayerMove(Integer x, Integer y) {
         // read input (mouse)
-        var coords = getCellCoordinates(x, y);
-        Integer cellX = coords[0];
-        Integer cellY = coords[1];
-        var cell = board.getCell(cellX, cellY);
 
 
-        if (!isGameOver) {
-            if (selection.pawnForPromotion != null) {
-                // check selected figure
-                var figure = getSelectedFigure(selection.pawnForPromotion, cellX, cellY);
-                //TODO
-                board.promotePawnWithSelectedFigure(figure, selection.pawnForPromotion[0], selection.pawnForPromotion[1]);
-                selection.pawnForPromotion = null;
-                return;
-            }
+        if(x < 50 && y < 50) {
+            getBestMove();
+        } else {
+            var coords = getCellCoordinates(x, y);
+            Integer cellX = coords[0];
+            Integer cellY = coords[1];
+            var cell = board.getCell(cellX, cellY);
 
-
-            if (selection.isDragAndDrop) {
-                try {
-                    selection.possibleMoves.forEach((move) -> {
-                        if (move[0].equals(cellX) && move[1].equals(cellY)) {
-                            moveSelectedFigure(cellX, cellY, selection.x, selection.y);
-                        }
-                    });
-
-                } finally {
-                    selection.isDragAndDrop = false;
+            if (!isGameOver) {
+                if (selection.pawnForPromotion != null) {
+                    // check selected figure
+                    var figure = getSelectedFigure(selection.pawnForPromotion, cellX, cellY);
+                    //TODO
+                    board.promotePawnWithSelectedFigure(figure, selection.pawnForPromotion[0], selection.pawnForPromotion[1]);
+                    selection.pawnForPromotion = null;
+                    return;
                 }
-            } else if (selection.selected) {
-                getBestMove();
-                boolean actionMade = false;
-                for (int i = 0; i < selection.possibleMoves.size(); i++) {
-                    var v = selection.possibleMoves.get(i);
-                    if (cellX.equals(v[0]) && cellY.equals(v[1])) {
-                        var selected = board.getCell(selection.x, selection.y);
-                        if (!isSameColor(cell, selected)) {
-                            if (getFiguresColor(selected).equals(board.currentColor)) {
+
+
+                if (selection.isDragAndDrop) {
+                    try {
+                        selection.possibleMoves.forEach((move) -> {
+                            if (move[0].equals(cellX) && move[1].equals(cellY)) {
+                                if (isPassage && ((board.field[move[0]][(board.history.get(board.history.size() - 1)[3])] == 11
+                                        && move[0].equals(board.history.get(board.history.size() - 1)[2]) && move[1].equals(board.history.get(board.history.size() - 1)[3] - 1))
+                                        || (board.field[move[0]][(board.history.get(board.history.size() - 1)[3])] == 21
+                                        && move[0].equals(board.history.get(board.history.size() - 1)[2]) && move[1].equals(board.history.get(board.history.size() - 1)[3] + 1)))) {
+                                    game.board.field[board.history.get(board.history.size() - 1)[2]][board.history.get(board.history.size() - 1)[3]] = 10;
+                                    isPassage = false;
+                                }
                                 moveSelectedFigure(cellX, cellY, selection.x, selection.y);
-                                actionMade = true;
+                            }
+                        });
+
+                    } finally {
+                        selection.isDragAndDrop = false;
+                    }
+                } else if (selection.selected) {
+                    boolean actionMade = false;
+                    for (int i = 0; i < selection.possibleMoves.size(); i++) {
+                        var v = selection.possibleMoves.get(i);
+                        if (cellX.equals(v[0]) && cellY.equals(v[1])) {
+                            var selected = board.getCell(selection.x, selection.y);
+                            if (!isSameColor(cell, selected)) {
+                                if (getFiguresColor(selected).equals(board.currentColor)) {
+                                    if (isPassage && ((board.field[cellX][(board.history.get(board.history.size() - 1)[3])] == 11
+                                            && cellX.equals(board.history.get(board.history.size() - 1)[2]) && cellY.equals(board.history.get(board.history.size() - 1)[3] - 1))
+                                            || (board.field[cellX][(board.history.get(board.history.size() - 1)[3])] == 21
+                                            && cellX.equals(board.history.get(board.history.size() - 1)[2]) && cellY.equals(board.history.get(board.history.size() - 1)[3] + 1)))) {
+                                        game.board.field[board.history.get(board.history.size() - 1)[2]][board.history.get(board.history.size() - 1)[3]] = 10;
+                                        isPassage = false;
+                                    }
+                                    moveSelectedFigure(cellX, cellY, selection.x, selection.y);
+                                    actionMade = true;
+                                }
                             }
                         }
                     }
-                }
-                selection.selected = false;
+                    selection.selected = false;
 
-                if (!actionMade && board.getCell(cellX, cellY) != 10) {
+                    if (!actionMade && board.getCell(cellX, cellY) != 10) {
+                        selectFigure(cellX, cellY, cell);
+                        selection.isDragAndDrop = true;
+                    } else {
+                        selection.isDragAndDrop = false;
+                    }
+
+                } else if (cell != 10) {
                     selectFigure(cellX, cellY, cell);
-                    selection.isDragAndDrop = true;
-                } else {
-                    selection.isDragAndDrop = false;
                 }
-
-            } else if (cell != 10) {
-                selectFigure(cellX, cellY, cell);
             }
+
         }
+
 
 
     }

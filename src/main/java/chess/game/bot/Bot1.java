@@ -83,9 +83,9 @@ public class Bot1 implements Bot {
                     if (score <= 0)
                         score = 1;
                 }
-//                if (copyBoard.isMate()) {
-//                    score = 100;
-//                }
+                if (copyBoard.isMate()) {
+                    score = 100;
+                }
                 var totalScoreOfMove = score - maxEnemyScore;
                 if (totalScoreOfMove >= bestMoveScore) {
                     bestMove = move;
@@ -111,10 +111,10 @@ public class Bot1 implements Bot {
                     var nextMove = getBestMove(nextMovesBoard, deep - 1);
                     if (nextMove != null) {
                         moveInfo.setValue(moveInfo.getValue() - nextMove.getValue());
-                    } else {
+                    } /*else {
                         moveInfo.setValue(moveInfo.getValue() + 150);
 
-                    }
+                    }*/
 
                 }
 

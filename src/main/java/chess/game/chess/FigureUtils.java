@@ -1,5 +1,7 @@
 package chess.game.chess;
 
+import chess.game.Game;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +12,9 @@ public class FigureUtils {
     public static Map<Integer, Integer> figuresValue = new HashMap<>();
     public static Map<Integer, String> nameOfLettersX = new HashMap<>();
     public static Map<Integer, String> nameOfLettersY = new HashMap<>();
+    public static Game game;
+    public static boolean isPassage = false;
+
 
 
     static {
@@ -69,6 +74,8 @@ public class FigureUtils {
 
     public static ArrayList<Integer[]> getPossibleMovesPawn(Integer x, Integer y, Integer[][] chessField) {
         var possibleMoves = new ArrayList<Integer[]>();
+
+
         if (chessField[x][y] == 11 && y != 7) {
             if (chessField[x][y + 1] == 10) possibleMoves.add(new Integer[]{x, y + 1});
             if (x > 0 && (!isSameColor(chessField[x - 1][y + 1], chessField[x][y]) && chessField[x - 1][y + 1] != 10))
@@ -86,7 +93,29 @@ public class FigureUtils {
             if (y == 6 && chessField[x][y - 1] == 10 && chessField[x][y - 2] == 10)
                 possibleMoves.add(new Integer[]{x, y - 2});
         }
+        possibleMoves.addAll(passage(x, y));
 
+        return possibleMoves;
+    }
+
+    public static ArrayList<Integer[]> passage(Integer x, Integer y) {
+        var possibleMoves = new ArrayList<Integer[]>();
+        var history = game.board.history;
+        if(history.size() > 1) {
+            var pawnX = history.get(history.size() - 1)[2];
+            var pawnY = history.get(history.size() - 1)[3];
+            if ((history.get(history.size() - 1)[1] == 1 && history.get(history.size() - 1)[3] == 3) || (history.get(history.size() - 1)[1] == 6 && history.get(history.size() - 1)[3] == 4) &&
+                    (game.board.field[history.get(history.size() - 1)[2]][history.get(history.size() - 1)[3]] == 11 || game.board.field[history.get(history.size() - 1)[2]][history.get(history.size() - 1)[3]] == 21)) {
+
+                if (game.board.field[history.get(history.size() - 1)[2]][history.get(history.size() - 1)[3]] == 11 && y.equals(pawnY) && (x == pawnX - 1 || x == pawnX + 1)) {
+                    possibleMoves.add(new Integer[]{history.get(history.size() - 1)[2], history.get(history.size() - 1)[3] - 1});
+                    isPassage = true;
+                } else if ((game.board.field[history.get(history.size() - 1)[2]][history.get(history.size() - 1)[3]] == 21 && y.equals(pawnY) && (x == pawnX - 1 || x == pawnX + 1))) {
+                    possibleMoves.add(new Integer[]{history.get(history.size() - 1)[2], history.get(history.size() - 1)[3] + 1});
+                    isPassage = true;
+                }
+            }
+        }
         return possibleMoves;
     }
 
