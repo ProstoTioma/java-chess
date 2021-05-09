@@ -111,17 +111,13 @@ public class Bot1 implements Bot {
                     var nextMove = getBestMove(nextMovesBoard, deep - 1);
                     if (nextMove != null) {
                         moveInfo.setValue(moveInfo.getValue() - nextMove.getValue());
-                    } /*else {
-                        moveInfo.setValue(moveInfo.getValue() - 150);
-
-                    }*/
-
+                    }
                 }
 
             }
         }
         if (!moveList.isEmpty()) {
-            var values = moveList.stream().map(e -> e.getValue()).sorted().collect(Collectors.toList());
+            var values = moveList.stream().map(Map.Entry::getValue).sorted().collect(Collectors.toList());
             var bestMoveList = moveList.stream().filter(bm -> bm.getValue().equals(values.get(values.size() - 1))).collect(Collectors.toList());
             var randomBestMoveIndex = ThreadLocalRandom.current().nextInt(0, bestMoveList.size());
             var bestMoveInfo = bestMoveList.get(randomBestMoveIndex);

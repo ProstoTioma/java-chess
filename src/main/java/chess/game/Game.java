@@ -31,9 +31,9 @@ public class Game implements Runnable{
         game = this;
 
         players.add(new Player("Player2"));
-        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 3)));
+//        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 3)));
 //        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 1)));
-        /*players.add(new Player("Player"));*/
+        players.add(new Player("Player"));
 //        players.add(new BotPlayer("botPlayer2", this, new Bot2(this)));
 
 
@@ -140,10 +140,11 @@ public class Game implements Runnable{
                     try {
                         selection.possibleMoves.forEach((move) -> {
                             if (move[0].equals(cellX) && move[1].equals(cellY)) {
-                                if (isPassage && ((board.field[move[0]][(board.history.get(board.history.size() - 1)[3])] == 11
+                                if (isPassage && ((board.field[move[0]][(board.history.get(board.history.size() - 1)[3])] == 11 && board.field[selection.x][selection.y] == 21
                                         && move[0].equals(board.history.get(board.history.size() - 1)[2]) && move[1].equals(board.history.get(board.history.size() - 1)[3] - 1))
-                                        || (board.field[move[0]][(board.history.get(board.history.size() - 1)[3])] == 21
+                                        || (board.field[move[0]][(board.history.get(board.history.size() - 1)[3])] == 21 && board.field[selection.x][selection.y] == 11
                                         && move[0].equals(board.history.get(board.history.size() - 1)[2]) && move[1].equals(board.history.get(board.history.size() - 1)[3] + 1)))) {
+
                                     game.board.field[board.history.get(board.history.size() - 1)[2]][board.history.get(board.history.size() - 1)[3]] = 10;
                                     isPassage = false;
                                 }
@@ -162,9 +163,9 @@ public class Game implements Runnable{
                             var selected = board.getCell(selection.x, selection.y);
                             if (!isSameColor(cell, selected)) {
                                 if (getFiguresColor(selected).equals(board.currentColor)) {
-                                    if (isPassage && ((board.field[cellX][(board.history.get(board.history.size() - 1)[3])] == 11
+                                    if (isPassage && ((board.field[cellX][(board.history.get(board.history.size() - 1)[3])] == 11 && board.field[selection.x][selection.y] == 21
                                             && cellX.equals(board.history.get(board.history.size() - 1)[2]) && cellY.equals(board.history.get(board.history.size() - 1)[3] - 1))
-                                            || (board.field[cellX][(board.history.get(board.history.size() - 1)[3])] == 21
+                                            || (board.field[cellX][(board.history.get(board.history.size() - 1)[3])] == 21 && board.field[selection.x][selection.y] == 11
                                             && cellX.equals(board.history.get(board.history.size() - 1)[2]) && cellY.equals(board.history.get(board.history.size() - 1)[3] + 1)))) {
                                         game.board.field[board.history.get(board.history.size() - 1)[2]][board.history.get(board.history.size() - 1)[3]] = 10;
                                         isPassage = false;
