@@ -16,38 +16,38 @@
         <maven.compiler.target>11</maven.compiler.target>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.github.bsideup.jabel</groupId>
-            <artifactId>jabel-javac-plugin</artifactId>
-            <version>0.3.0</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
+<!--    <dependencies>-->
+<!--        <dependency>-->
+<!--            <groupId>com.github.bsideup.jabel</groupId>-->
+<!--            <artifactId>jabel-javac-plugin</artifactId>-->
+<!--            <version>0.3.0</version>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
+<!--    </dependencies>-->
 
-    <profiles>
-        <profile>
-            <id>intellij-idea-only</id>
-            <activation>
-                <property>
-                    <name>idea.maven.embedder.version</name>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <configuration>
-                            <compilerArgs>
-                                <arg>--enable-preview</arg>
-                            </compilerArgs>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+<!--    <profiles>-->
+<!--        <profile>-->
+<!--            <id>intellij-idea-only</id>-->
+<!--            <activation>-->
+<!--                <property>-->
+<!--                    <name>idea.maven.embedder.version</name>-->
+<!--                </property>-->
+<!--            </activation>-->
+<!--            <build>-->
+<!--                <plugins>-->
+<!--                    <plugin>-->
+<!--                        <groupId>org.apache.maven.plugins</groupId>-->
+<!--                        <artifactId>maven-compiler-plugin</artifactId>-->
+<!--                        <configuration>-->
+<!--                            <compilerArgs>-->
+<!--                                <arg>&#45;&#45;enable-preview</arg>-->
+<!--                            </compilerArgs>-->
+<!--                        </configuration>-->
+<!--                    </plugin>-->
+<!--                </plugins>-->
+<!--            </build>-->
+<!--        </profile>-->
+<!--    </profiles>-->
 
     <build>
         <plugins>
@@ -66,21 +66,21 @@
                     </archive>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <!-- Make sure we're not using Java 9+ APIs -->
-                    <release>8</release>
-                    <source>11</source>
-                    <target>11</target>
-                    <!-- The following setting can be avoided on Java 14 and higher -->
-                    <compilerArgs>
-                        <arg>-Xplugin:jabel</arg>
-                    </compilerArgs>
-                </configuration>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-compiler-plugin</artifactId>-->
+<!--                <version>3.8.1</version>-->
+<!--                <configuration>-->
+<!--                    &lt;!&ndash; Make sure we're not using Java 9+ APIs &ndash;&gt;-->
+<!--                    <release>11</release>-->
+<!--                    <source>11</source>-->
+<!--                    <target>11</target>-->
+<!--                    &lt;!&ndash; The following setting can be avoided on Java 14 and higher &ndash;&gt;-->
+<!--                    <compilerArgs>-->
+<!--                        <arg>-Xplugin:jabel</arg>-->
+<!--                    </compilerArgs>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 
