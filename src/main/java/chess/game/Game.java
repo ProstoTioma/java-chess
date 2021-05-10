@@ -28,9 +28,10 @@ public class Game implements Runnable {
         board = new ChessBoard();
         game = this;
 
-        players.add(new Player("Player1"));
-        players.add(new Player("Player2"));
-//        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 3)));
+        /*players.add(new Player("Player1"));*/
+//        players.add(new Player("Player2"));
+        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 3)));
+        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 3)));
         //players.add(new BotPlayer("botPlayer", this, new Bot3(this, 3)));
 //        players.add(new Player("Player"));
 //        players.add(new BotPlayer("botPlayer2", this, new Bot2(this)));

@@ -22,9 +22,7 @@ public class Bot1 implements Bot {
         this.deep = deep;
     }
 
-    public void olejBotMove() {
 
-    }
 
 
     public void makeBotMove() {
@@ -50,9 +48,17 @@ public class Bot1 implements Bot {
         });
 
         movesMap.forEach((figure, moves) -> {
-
             for (Integer[] move : moves) {
                 Integer score = FigureUtils.figuresValue.get(board.getCell(move[0], move[1]));
+
+                if((board.field[figure[0]][figure[1]] == 16 || board.field[figure[0]][figure[1]] == 26) && (board.canCastling(false) || board.canCastling(true))
+                && ((move[0] == 2 && (move[1] == 7 || move[1] == 0)) || (move[0] == 6 && (move[1] == 7 || move[1] == 0)))){
+                    if(score == 0) score = 1;
+                }
+                /*else if((board.field[figure[0]][figure[1]] == 12 || board.field[figure[0]][figure[1]] == 22)){
+                    if(!board.movesHistory.get(board.movesHistory.size() - 1).isShortCastling() && !board.movesHistory.get(board.movesHistory.size() - 1).isLongCastling())
+                    if(score == 0) score = -1;
+                }*/
 
                 if (isPawn(board.getCell(figure[0], figure[1])) && onOppositeSide(nextColor, move[1])) {
                     if (move[1] == 7 || move[1] == 0) {
@@ -70,7 +76,6 @@ public class Bot1 implements Bot {
                 if (copyBoard.isMate()) {
                     score = 100;
                 }
-
                 movesValues.put(new Integer[]{figure[0], figure[1], move[0], move[1]}, score);
             }
         });
@@ -90,7 +95,7 @@ public class Bot1 implements Bot {
                         var nextMove = getBestMove(nextMovesBoard, deep - 1);
 
                         if (nextMovesBoard.isCheck(nextColor, nextMovesBoard.field)) {
-                            if (moveInfo.getValue() <= 0)
+                            if (moveInfo.getValue() == 0)
                                 moveInfo.setValue(moveInfo.getValue() + 1);
                         }
                         if (nextMovesBoard.isMate()) {

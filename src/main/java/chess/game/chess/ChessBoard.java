@@ -273,7 +273,7 @@ public class ChessBoard {
         return null;
     }
 
-    private boolean canCastling(boolean isShort) {
+    public boolean canCastling(boolean isShort) {
         boolean kingMoved = false;
         boolean rockMoved = false;
         Integer y = (currentColor.equals("WHITE")) ? 7 : 0;
