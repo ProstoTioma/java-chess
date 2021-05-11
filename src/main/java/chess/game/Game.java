@@ -29,11 +29,12 @@ public class Game implements Runnable {
         board = new ChessBoard();
         game = this;
 
-        players.add(new Player("Player1"));
-        players.add(new Player("Player2"));
-        //players.add(new BotPlayer("botPlayer", this, new Bot1(this, 3)));
+//        players.add(new Player("Player1"));
+//        players.add(new Player("Player2"));
+        //players.add(new BotPlayer("botPlayer", this, new Bot1(this, 4)));
+        players.add(new BotPlayer("botPlayer2", this, new Bot1(this, 4)));
 //        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 1)));
-//        players.add(new BotPlayer("botPlayer", this, new Bot3(this, 4)));
+        players.add(new BotPlayer("botPlayer", this, new Bot3(this, 3)));
 //        players.add(new Player("Player"));
 //        players.add(new BotPlayer("botPlayer2", this, new Bot2(this)));
 
@@ -99,7 +100,7 @@ public class Game implements Runnable {
                     System.out.printf("Mate! Winner: %s. %d moves", nextColor, board.history.size() / 2);
                     return;
                 }
-                Thread.sleep(200);
+                Thread.sleep(50);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

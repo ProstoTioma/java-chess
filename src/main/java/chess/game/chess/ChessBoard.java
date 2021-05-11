@@ -139,14 +139,22 @@ public class ChessBoard {
         var possibleMoves = getPossibleMoves(x, y, field);
         List<Integer[]> validMoves = new ArrayList<>();
 
+        //var copyBoard = this.copy();
+        Integer[][] copyField = deepCopy(field);
+
         for (Integer[] move : possibleMoves) {
-            Integer[][] copyField = deepCopy(field);
+            var to = copyField[move[0]][move[1]];
+            var from = copyField[x][y];
+
             copyField[move[0]][move[1]] = copyField[x][y];
             copyField[x][y] = 10;
             //var nextColor = (currentColor.equals("WHITE")) ? "BLACK" : "WHITE";
             if (!isCheck(currentColor, copyField)) {
                 validMoves.add(move);
             }
+
+            copyField[move[0]][move[1]] = to;
+            copyField[x][y] = from;
 
         }
 
