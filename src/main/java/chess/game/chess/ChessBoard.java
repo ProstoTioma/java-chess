@@ -342,43 +342,26 @@ public class ChessBoard {
 
     public void undo() {
         var movesCount = movesHistory.size();
-        int y2 = currentColor.equals("WHITE") ? 7 : 0;
-        int y1 = currentColor.equals("WHITE") ? 0 : 7;
-        if (movesCount > 1) {
-            var lastMoveBlack = movesHistory.get(movesCount - 1);
-            var from1 = lastMoveBlack.from;
-            var to1 = lastMoveBlack.to;
+        int y = currentColor.equals("WHITE") ? 0 : 7;
 
+        if (movesCount >= 1) {
 
-            field[from1.x][from1.y] = from1.code;
-            field[to1.x][to1.y] = to1.code;
+            var lastMove = movesHistory.get(movesCount - 1);
+            var from = lastMove.from;
+            var to = lastMove.to;
 
-            if (lastMoveBlack.isLongCastling()) {
-                field[3][y1] = 10;
-                field[0][y1] = (y1 == 0) ? 12 : 22;
-            } else if (lastMoveBlack.isShortCastling()) {
-                field[5][y1] = 10;
-                field[7][y1] = (y1 == 0) ? 12 : 22;
+            field[from.x][from.y] = from.code;
+            field[to.x][to.y] = to.code;
 
+            if (lastMove.isLongCastling()) {
+                field[3][y] = 10;
+                field[0][y] = (y == 0) ? 12 : 22;
+            } else if (lastMove.isShortCastling()) {
+                field[5][y] = 10;
+                field[7][y] = (y == 0) ? 12 : 22;
             }
 
-            var lastMoveWhite = movesHistory.get(movesCount - 2);
-            var from2 = lastMoveWhite.from;
-            var to2 = lastMoveWhite.to;
-
-
-            field[from2.x][from2.y] = from2.code;
-            field[to2.x][to2.y] = to2.code;
-
-            if (lastMoveWhite.isLongCastling()) {
-                field[3][y2] = 10;
-                field[0][y2] = (y2 == 0) ? 12 : 22;
-            } else if (lastMoveWhite.isShortCastling()) {
-                field[5][y2] = 10;
-                field[7][y2] = (y2 == 0) ? 12 : 22;
-            }
-
-
+            nextColor();
             history.remove(history.size() - 1);
             movesHistory.remove(movesHistory.size() - 1);
 
