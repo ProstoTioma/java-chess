@@ -1,6 +1,7 @@
 package chess.game;
 
 import chess.game.bot.Bot1;
+import chess.game.bot.Bot3;
 import chess.game.chess.ChessBoard;
 import chess.game.player.BotPlayer;
 import chess.game.player.Player;
@@ -28,11 +29,11 @@ public class Game implements Runnable {
         board = new ChessBoard();
         game = this;
 
-        /*players.add(new Player("Player1"));*/
-//        players.add(new Player("Player2"));
-        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 3)));
-        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 3)));
-        //players.add(new BotPlayer("botPlayer", this, new Bot3(this, 3)));
+        players.add(new Player("Player1"));
+        players.add(new Player("Player2"));
+//        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 3)));
+//        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 1)));
+//        players.add(new BotPlayer("botPlayer", this, new Bot3(this, 4)));
 //        players.add(new Player("Player"));
 //        players.add(new BotPlayer("botPlayer2", this, new Bot2(this)));
 
@@ -42,7 +43,9 @@ public class Game implements Runnable {
                 board.undo();
                 //getBestMove();
             } else if(event.getX() > 850 && event.getY() < 50) {
-                getBestMove();
+                getBestMove(3);
+            } else if(event.getX() > 850 && event.getY() > 850) {
+                getBestMove(4);
             }
             else if (getCurrentPlayer().type == PlayerType.LOCAL) {
                 localPlayerMove(event.getX(), event.getY());
@@ -61,8 +64,8 @@ public class Game implements Runnable {
         new Thread(this).start();
     }
 
-    void getBestMove() {
-        var bestMove = new Bot1(this, 3).getBestMove(board, 3);
+    void getBestMove(int deep) {
+        var bestMove = new Bot1(this, 4).getBestMove(board, deep);
         var move = bestMove.getKey();
         System.out.println(nameOfLettersX.get(move[0]) + nameOfLettersY.get(move[1]) + " " + nameOfLettersX.get(move[2]) + nameOfLettersY.get(move[3]) + " Value: " + bestMove.getValue());
     }
