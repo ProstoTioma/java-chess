@@ -61,7 +61,7 @@ public class Bot1 implements Bot {
                     if(score == 0) score = -1;
                 }*/
 
-                if (isPawn(board.getCell(figure[0], figure[1])) && onOppositeSide(nextColor, move[1])) {
+                if (isPawn(board.getCell(figure[0], figure[1]))) {
                     if (move[1] == 7 || move[1] == 0) {
                         score += 9;
                     }
@@ -127,14 +127,14 @@ public class Bot1 implements Bot {
 
     private int getLimit(int deep) {
         if (this.deep - deep == 0) {
-            return 30;
+            return 50;
         }
         else if (this.deep - deep == 1) {
-            return 20;
+            return 50;
         } else if (this.deep - deep == 2) {
-            return 8;
+            return 50;
         } else if (this.deep - deep == 3) {
-            return 4;
+            return 8;
         } else if(this.deep - deep == 4) {
             return 2;
         } else {

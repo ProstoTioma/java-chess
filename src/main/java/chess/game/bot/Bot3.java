@@ -56,7 +56,7 @@ public class Bot3 implements Bot {
             for (Integer[] move : moves) {
                 Integer score = FigureUtils.figuresValue.get(board.getCell(move[0], move[1]));
 
-                if (isPawn(board.getCell(figure[0], figure[1])) && onOppositeSide(nextColor, move[1])) {
+                if (isPawn(board.getCell(figure[0], figure[1]))) {
 //                    score += 1;
                     if (move[1] == 7 || move[1] == 0) {
                         score += 9;
