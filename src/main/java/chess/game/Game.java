@@ -68,6 +68,7 @@ public class Game implements Runnable {
     void getBestMove(int deep) {
         var bestMove = new Bot1(this, deep).getBestMove(board.copy(), deep);
         var move = bestMove.getKey();
+        Bot1.i = 0;
         System.out.println(nameOfLettersX.get(move[0]) + nameOfLettersY.get(move[1]) + " " + nameOfLettersX.get(move[2]) + nameOfLettersY.get(move[3]) + " Value: " + bestMove.getValue());
     }
 
