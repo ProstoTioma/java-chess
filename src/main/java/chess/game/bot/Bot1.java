@@ -4,7 +4,10 @@ import chess.game.Game;
 import chess.game.chess.ChessBoard;
 import chess.game.chess.FigureUtils;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -56,11 +59,16 @@ public class Bot1 implements Bot {
                         && ((move[0] == 2 && (move[1] == 7 || move[1] == 0)) || (move[0] == 6 && (move[1] == 7 || move[1] == 0)))) {
                     if (score == 0) score = 1;
                 }
+
+
+                if (!game.wasCastling(board.currentColor) && (board.field[figure[0]][figure[1]] == 22 || board.field[figure[0]][figure[1]] == 12)) {
+                    if (score == 0) score = -1;
+                }
                 /*else if((board.field[figure[0]][figure[1]] == 12 || board.field[figure[0]][figure[1]] == 22)){
                     if(!board.movesHistory.get(board.movesHistory.size() - 1).isShortCastling() && !board.movesHistory.get(board.movesHistory.size() - 1).isLongCastling())
                     if(score == 0) score = -1;
-                }*/
-
+                }
+*/
                 if (isPawn(board.getCell(figure[0], figure[1]))) {
                     if (move[1] == 7 || move[1] == 0) {
                         score += 9;
@@ -128,14 +136,13 @@ public class Bot1 implements Bot {
     private int getLimit(int deep) {
         if (this.deep - deep == 0) {
             return 50;
-        }
-        else if (this.deep - deep == 1) {
+        } else if (this.deep - deep == 1) {
             return 50;
         } else if (this.deep - deep == 2) {
             return 50;
         } else if (this.deep - deep == 3) {
             return 10;
-        } else if(this.deep - deep == 4) {
+        } else if (this.deep - deep == 4) {
             return 8;
         } else {
             return 1;

@@ -5,9 +5,12 @@ public class Move {
     Cell from;
     Cell to;
 
-    private boolean isLongCastling;
-    private boolean isShortCastling;
+    private boolean isLongCastlingWhite;
+    private boolean isLongCastlingBlack;
+    private boolean isShortCastlingWhite;
+    private boolean isShortCastlingBlack;
     private int promotionCode;
+    private String color;
 
     public Cell getFrom() {
         return from;
@@ -22,20 +25,32 @@ public class Move {
         this.to = to;
     }
 
-    public boolean isLongCastling() {
-        return isLongCastling;
+    public boolean isLongCastlingBlack() {
+        return isLongCastlingBlack;
     }
 
-    public void setLongCastling(boolean longCastling) {
-        isLongCastling = longCastling;
+    public boolean isLongCastlingWhite() {
+        return isLongCastlingWhite;
     }
 
-    public boolean isShortCastling() {
-        return isShortCastling;
+    public void setLongCastling(boolean longCastling, String color) {
+        if(color.equals("WHITE")) {
+            isLongCastlingWhite = longCastling;
+        } else isLongCastlingBlack = longCastling;
     }
 
-    public void setShortCastling(boolean shortCastling) {
-        isShortCastling = shortCastling;
+    public boolean isShortCastlingBlack() {
+        return isShortCastlingBlack;
+    }
+
+    public boolean isShortCastlingWhite() {
+        return isShortCastlingWhite;
+    }
+
+    public void setShortCastling(boolean shortCastling, String color) {
+        if(color.equals("WHITE")) {
+            isShortCastlingWhite = shortCastling;
+        } else isShortCastlingBlack = shortCastling;
     }
 
     public int getPromotionCode() {

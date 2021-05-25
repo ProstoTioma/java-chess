@@ -15,12 +15,31 @@ public class ChessBoard {
     public List<Integer[]> history = Collections.synchronizedList(new ArrayList<>());
     public List<Move> movesHistory = Collections.synchronizedList(new ArrayList<>());
 
+
     public ChessBoard() {
         initField();
     }
 
     public ChessBoard(Integer[][] field) {
         this.field = field;
+    }
+
+    public static String getFiguresColor(Integer code) {
+        if (code < 17 && code > 10) return "BLACK";
+        else if (code > 17) return "WHITE";
+        else return "VOID";
+    }
+
+    public static Integer[][] deepCopy(Integer[][] org) {
+        if (org == null) {
+            return null;
+        }
+
+        final Integer[][] res = new Integer[org.length][];
+        for (int i = 0; i < org.length; i++) {
+            res[i] = Arrays.copyOf(org[i], org[i].length);
+        }
+        return res;
     }
 
     private void initField() {
@@ -54,12 +73,6 @@ public class ChessBoard {
         }
     }
 
-    public static String getFiguresColor(Integer code) {
-        if (code < 17 && code > 10) return "BLACK";
-        else if (code > 17) return "WHITE";
-        else return "VOID";
-    }
-
     public void moveFigure(Integer cellX, Integer cellY, Integer figureX, Integer figureY, Integer promotionCode) {
         Cell from = new Cell(figureX, figureY, field[figureX][figureY]);
         Cell to = new Cell(cellX, cellY, field[cellX][cellY]);
@@ -68,16 +81,16 @@ public class ChessBoard {
         if (isLongCastlingMove(cellX, figureX, figureY)) {
             field[cellX + 1][cellY] = field[0][cellY];
             field[0][cellY] = 10;
-            move.setLongCastling(true);
+            move.setLongCastling(true, currentColor);
         } else if (isShortCastlingMove(cellX, figureX, figureY)) {
             field[cellX - 1][cellY] = field[7][cellY];
             field[7][cellY] = 10;
-            move.setShortCastling(true);
+            move.setShortCastling(true, currentColor);
         }
         field[figureX][figureY] = 10;
         var pawn = getPawnForPromotion();
 
-        if (pawn != null ) {
+        if (pawn != null) {
             //BOT ONLY
             if (promotionCode != null) {
                 //changePawnToQueen(pawn[0], pawn[1]);
@@ -90,6 +103,7 @@ public class ChessBoard {
                 history.add(new Integer[]{figureX, figureY, cellX, cellY});
             }
             movesHistory.add(move);
+
             return;
             //todo change to promotion code instead of queen
         }
@@ -300,18 +314,6 @@ public class ChessBoard {
         }
     }
 
-    public static Integer[][] deepCopy(Integer[][] org) {
-        if (org == null) {
-            return null;
-        }
-
-        final Integer[][] res = new Integer[org.length][];
-        for (int i = 0; i < org.length; i++) {
-            res[i] = Arrays.copyOf(org[i], org[i].length);
-        }
-        return res;
-    }
-
     public boolean isDraw() {
         if (history.size() > 9) {
             var moveL = history.get(history.size() - 1);
@@ -349,7 +351,7 @@ public class ChessBoard {
     }
 
     public void undo() {
-        if(game.isGameOver) game.isGameOver = false;
+        if (game.isGameOver) game.isGameOver = false;
         var movesCount = movesHistory.size();
         int y = currentColor.equals("WHITE") ? 0 : 7;
 
@@ -362,10 +364,10 @@ public class ChessBoard {
             field[from.x][from.y] = from.code;
             field[to.x][to.y] = to.code;
 
-            if (lastMove.isLongCastling()) {
+            if (lastMove.isLongCastlingWhite() || lastMove.isLongCastlingBlack()) {
                 field[3][y] = 10;
                 field[0][y] = (y == 0) ? 12 : 22;
-            } else if (lastMove.isShortCastling()) {
+            } else if (lastMove.isShortCastlingWhite() || lastMove.isShortCastlingBlack()) {
                 field[5][y] = 10;
                 field[7][y] = (y == 0) ? 12 : 22;
             }
