@@ -20,14 +20,7 @@ import static chess.game.chess.FigureUtils.figuresMap;
 
 public class Screen extends Canvas {
 
-    private final BufferStrategy strategy;
-
-    private final Integer width;
-    private final Integer height;
-
     public static Map<String, BufferedImage> imageMap = new HashMap<>();
-
-    private final Game game = new Game();
 
     static {
         figuresMap.forEach((k, v) -> {
@@ -38,6 +31,11 @@ public class Screen extends Canvas {
             }
         });
     }
+
+    private final BufferStrategy strategy;
+    private final Integer width;
+    private final Integer height;
+    private final Game game = new Game();
 
 
     public Screen(Integer width, Integer height) {
@@ -97,6 +95,11 @@ public class Screen extends Canvas {
         return area;
     }
 
+    private static InputStream getImageByName(String name) {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        return loader.getResourceAsStream("image/" + name);
+    }
+
     public void gameLoop() throws InterruptedException, IOException {
         while (true) {
             Thread.sleep(20);
@@ -119,6 +122,7 @@ public class Screen extends Canvas {
         drawDragAndDrop(g);
 
         drawFigureSelectionPopup(g);
+        drawRedRect(g);
 
         g.dispose();
         strategy.show();
@@ -189,11 +193,6 @@ public class Screen extends Canvas {
     private void drawImage(Graphics2D g, String figureName, Integer x, Integer y) {
         var bi = imageMap.get(figureName);
         g.drawImage(bi, null, x, y);
-    }
-
-    private static InputStream getImageByName(String name) {
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        return loader.getResourceAsStream("image/" + name);
     }
 
     private void drawSelection(Graphics2D g) {
@@ -268,17 +267,25 @@ public class Screen extends Canvas {
         }
     }
 
+    private void drawRedRect(Graphics2D g) {
+        if(game.isRed) {
+            g.setColor(Color.red);
+            g.drawRect(game.redX, game.redY, 100, 100);
+
+        }
+    }
+
     private void drawFigureSelectionPopup(Graphics2D g) {
         var pawn = game.selection.pawnForPromotion;
         if (pawn != null) {
-            if(pawn[1] == 0) {
+            if (pawn[1] == 0) {
                 g.setColor(Color.WHITE);
                 g.fillRoundRect((pawn[0] * 100) + 50, 50, 100, 400, 10, 10);
                 drawImage(g, "wq", (pawn[0] * 100) + 50, 50);
                 drawImage(g, "wn", (pawn[0] * 100) + 50, 150);
                 drawImage(g, "wr", (pawn[0] * 100) + 50, 250);
                 drawImage(g, "wb", (pawn[0] * 100) + 50, 350);
-            } else if(pawn[1] == 7) {
+            } else if (pawn[1] == 7) {
                 g.setColor(Color.WHITE);
                 g.fillRoundRect((pawn[0] * 100) + 50, 450, 100, 400, 10, 10);
                 drawImage(g, "bb", (pawn[0] * 100) + 50, 450);

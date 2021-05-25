@@ -1,13 +1,13 @@
 package chess.game;
 
 import chess.game.bot.Bot1;
-import chess.game.bot.Bot3;
 import chess.game.chess.ChessBoard;
 import chess.game.player.BotPlayer;
 import chess.game.player.Player;
 import chess.game.player.PlayerType;
 import chess.input.MouseHandler;
 
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,6 +22,9 @@ public class Game implements Runnable {
     public List<Player> players = new ArrayList<>();
     public ChessBoard board;
     public boolean isGameOver = false;
+    public int redX;
+    public int redY;
+    public boolean isRed;
 
 
     public Game() {
@@ -42,22 +45,40 @@ public class Game implements Runnable {
 
 
         mouseHandler.addOnPressedListener((MouseEvent event) -> {
-            if (event.getX() < 50 && event.getY() < 50) {
-                board.undo();
-                //getBestMove();
-            } else if(event.getX() > 850 && event.getY() < 50) {
-                getBestMove(3);
-            } else if(event.getX() > 850 && event.getY() > 850) {
-                getBestMove(4);
-            }
-            else if (getCurrentPlayer().type == PlayerType.LOCAL) {
-                localPlayerMove(event.getX(), event.getY());
+            if (event.getButton() != 3) {
+                isRed = false;
+                if (event.getX() < 50 && event.getY() < 50) {
+                    board.undo();
+                    //getBestMove();
+                } else if (event.getX() > 850 && event.getY() < 50) {
+                    getBestMove(3);
+                } else if (event.getX() > 850 && event.getY() > 850) {
+                    getBestMove(4);
+                } else if (getCurrentPlayer().type == PlayerType.LOCAL) {
+                    localPlayerMove(event.getX(), event.getY());
+                }
+            } else {
+                if(event.getX() > 50 && event.getX() < 850 && event.getY() > 50 && event.getY() < 850) {
+                    if(isRed && redX == ((getCellCoordinates(event.getX(), event.getY())[0] * 100) + 50) && redY == ((getCellCoordinates(event.getX(), event.getY())[1] * 100) + 50)) {
+                        isRed = false;
+                    }
+                    else {
+                        isRed = true;
+                        var cell = getCellCoordinates(event.getX(), event.getY());
+                        redX = (cell[0] * 100) + 50;
+                        redY = (cell[1] * 100) + 50;
+                    }
+
+                }
             }
         });
         mouseHandler.addOnReleasedListener((MouseEvent event) -> {
-            if (getCurrentPlayer().type == PlayerType.LOCAL) {
-                localPlayerMove(event.getX(), event.getY());
-                selection.isDragAndDrop = false;
+            if (event.getButton() != 3) {
+                isRed = false;
+                if (getCurrentPlayer().type == PlayerType.LOCAL) {
+                    localPlayerMove(event.getX(), event.getY());
+                    selection.isDragAndDrop = false;
+                }
             }
         });
         mouseHandler.addOnDraggedListener((MouseEvent event) -> {
@@ -128,7 +149,7 @@ public class Game implements Runnable {
 
     public void localPlayerMove(Integer x, Integer y) {
         var coords = getCellCoordinates(x, y);
-        if(x > 50 && y > 50 && x < 850 && y < 850) {
+        if (x > 50 && y > 50 && x < 850 && y < 850) {
             Integer cellX = coords[0];
             Integer cellY = coords[1];
             var cell = board.getCell(cellX, cellY);
@@ -250,7 +271,7 @@ public class Game implements Runnable {
     }
 
     public boolean wasCastling(String color) {
-        for(var v : board.movesHistory) {
+        for (var v : board.movesHistory) {
             if ((color.equals("BLACK") && (v.isLongCastlingBlack() || v.isShortCastlingBlack())) || (color.equals("WHITE") && (v.isLongCastlingWhite() || v.isShortCastlingWhite()))) {
                 return true;
 
