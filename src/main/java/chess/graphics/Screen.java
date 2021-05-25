@@ -269,7 +269,7 @@ public class Screen extends Canvas {
 
     private void drawRedRect(Graphics2D g) {
         if(game.isRed) {
-            g.setColor(Color.red);
+            g.setColor(new Color(58, 152, 78));
             g.drawRect(game.redX, game.redY, 100, 100);
 
         }
