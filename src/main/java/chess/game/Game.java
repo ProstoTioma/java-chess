@@ -21,7 +21,7 @@ public class Game implements Runnable {
     private final MouseHandler mouseHandler = new MouseHandler();
     public List<Player> players = new ArrayList<>();
     public ChessBoard board;
-    boolean isGameOver = false;
+    public boolean isGameOver = false;
 
 
     public Game() {
@@ -31,7 +31,7 @@ public class Game implements Runnable {
 
         players.add(new Player("Player1"));
         players.add(new Player("Player2"));
-        //players.add(new BotPlayer("botPlayer", this, new Bot1(this, 4)));
+//        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 3)));
 //        players.add(new BotPlayer("botPlayer2", this, new Bot1(this, 3)));
 //        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 1)));
 //        players.add(new BotPlayer("botPlayer", this, new Bot3(this, 3)));

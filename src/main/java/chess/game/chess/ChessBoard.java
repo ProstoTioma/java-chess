@@ -349,6 +349,7 @@ public class ChessBoard {
     }
 
     public void undo() {
+        if(game.isGameOver) game.isGameOver = false;
         var movesCount = movesHistory.size();
         int y = currentColor.equals("WHITE") ? 0 : 7;
 

@@ -134,9 +134,9 @@ public class Bot1 implements Bot {
         } else if (this.deep - deep == 2) {
             return 50;
         } else if (this.deep - deep == 3) {
-            return 8;
+            return 10;
         } else if(this.deep - deep == 4) {
-            return 2;
+            return 8;
         } else {
             return 1;
         }
