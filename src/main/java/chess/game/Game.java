@@ -1,6 +1,8 @@
 package chess.game;
 
 import chess.game.bot.Bot1;
+import chess.game.bot.Bot2;
+import chess.game.bot.Bot3;
 import chess.game.chess.ChessBoard;
 import chess.game.player.BotPlayer;
 import chess.game.player.Player;
@@ -32,10 +34,10 @@ public class Game implements Runnable {
         board = new ChessBoard();
         game = this;
 
-        /*players.add(new Player("Player1"));
-        players.add(new Player("Player2"));*/
-        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 3)));
-        players.add(new BotPlayer("botPlayer2", this, new Bot1(this, 3)));
+        players.add(new Player("Player1"));
+        players.add(new Player("Player2"));
+        /*players.add(new BotPlayer("botPlayer", this, new Bot1(this, 3)));
+        players.add(new BotPlayer("botPlayer2", this, new Bot1(this, 3)));*/
 
 
         //        players.add(new BotPlayer("botPlayer", this, new Bot1(this, 1)));

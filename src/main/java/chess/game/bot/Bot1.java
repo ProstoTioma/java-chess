@@ -64,6 +64,7 @@ public class Bot1 implements Bot {
                 if (!game.wasCastling(board.currentColor) && (board.field[figure[0]][figure[1]] == 22 || board.field[figure[0]][figure[1]] == 12)) {
                     if (score == 0) score = -1;
                 }
+
                 /*else if((board.field[figure[0]][figure[1]] == 12 || board.field[figure[0]][figure[1]] == 22)){
                     if(!board.movesHistory.get(board.movesHistory.size() - 1).isShortCastling() && !board.movesHistory.get(board.movesHistory.size() - 1).isLongCastling())
                     if(score == 0) score = -1;
@@ -74,6 +75,7 @@ public class Bot1 implements Bot {
                         score += 9;
                     }
                 }
+
 
                 //var copyBoard = board.copy();
                 board.moveFigure(move[0], move[1], figure[0], figure[1], getPromotionCode(nextColor));
@@ -124,8 +126,32 @@ public class Bot1 implements Bot {
 
             var values = movesValuesList.stream().map(Map.Entry::getValue).sorted().collect(Collectors.toList());
             var bestMovesValuesList = movesValuesList.stream().filter(bm -> bm.getValue().equals(values.get(values.size() - 1))).collect(Collectors.toList());
+
+            var bestMoveInfo = bestMovesValuesList.get(0);
+
+            if(deep == 3) {
+                var visionScoreMax = 0;
+
+                for (var v : bestMovesValuesList) {
+                    int visionScore = 0;
+                    board.moveFigure(v.getKey()[2], v.getKey()[3], v.getKey()[0], v.getKey()[1], getPromotionCode(nextColor));
+                    board.nextColor();
+                    var figuresByColour = board.getAllFiguresByColor(board.currentColor);
+                    for (var score : figuresByColour) {
+                        visionScore += board.getValidPossibleMoves(score[0], score[1]).size();
+                    }
+                    board.undo();
+                    board.nextColor();
+
+                    if (visionScore >= visionScoreMax) {
+                        visionScoreMax = visionScore;
+                        bestMoveInfo = v;
+                    }
+                }
+            }
+
             var randomBestMoveIndex = ThreadLocalRandom.current().nextInt(0, bestMovesValuesList.size());
-            var bestMoveInfo = bestMovesValuesList.get(randomBestMoveIndex);
+            //var bestMoveInfo = bestMovesValuesList.get(randomBestMoveIndex);
             return bestMoveInfo;
         } else {
             return null;
