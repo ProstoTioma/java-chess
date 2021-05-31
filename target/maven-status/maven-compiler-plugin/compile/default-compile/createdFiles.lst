@@ -1,0 +1,17 @@
+chess\game\Game.class
+chess\game\bot\Bot.class
+chess\graphics\Screen$1.class
+chess\game\chess\Move.class
+chess\game\chess\FigureUtils.class
+chess\game\bot\Bot3.class
+chess\game\bot\Bot1.class
+chess\game\chess\ChessBoard.class
+chess\game\chess\Cell.class
+chess\graphics\Screen.class
+chess\Main.class
+chess\game\player\Player.class
+chess\game\player\BotPlayer.class
+chess\input\MouseHandler.class
+chess\game\Selection.class
+chess\game\bot\Bot2.class
+chess\game\player\PlayerType.class
